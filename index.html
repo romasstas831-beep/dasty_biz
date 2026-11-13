@@ -3,587 +3,404 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tobacco Shop RP</title>
+<title>Тютюновий бізнес</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0b0907; --bg2:#15110d; --card:rgba(30,24,18,.62); --card2:rgba(44,35,26,.7);
-  --line:rgba(232,163,61,.18); --text:#f1e8da; --muted:#a39682;
-  --accent:#e8a33d; --accent2:#c0392b; --ok:#6fcf7f; --bad:#ff6b5e;
-  --mx:50%; --my:50%;
-}
+:root{--bg:#0b0907;--card:rgba(30,24,18,.64);--text:#f1e8da;--muted:#a39682;--accent:#e8a33d;--accent2:#c0392b;--ok:#6fcf7f;--bad:#ff6b5e}
+[data-theme=saloon]{--bg:#150c05;--accent:#d98a3a;--accent2:#7a3b12;--text:#f5e3c6}
+[data-theme=noir]{--bg:#09090b;--accent:#cfd4dc;--accent2:#5b6472;--text:#e8eaee;--muted:#8d95a3}
+[data-theme=newyear]{--bg:#06120e;--accent:#7be0a4;--accent2:#c0392b}
+[data-theme=halloween]{--bg:#0e0710;--accent:#ff8a1f;--accent2:#7b2cbf}
+body{--line:color-mix(in srgb,var(--accent) 22%,transparent)}
+body[data-tax=warn]{--accent:#f2c230;--accent2:#b8860b}
+body[data-tax=crit],body[data-tax=over]{--accent:#ff5a4a;--accent2:#8e1f16}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
-  background-image:radial-gradient(1200px 700px at 15% -10%,rgba(232,163,61,.13),transparent 60%),radial-gradient(900px 600px at 100% 110%,rgba(192,57,43,.12),transparent 60%);
-  background-attachment:fixed}
-h1,h2,h3,.brand{font-family:'Cinzel',serif;letter-spacing:.04em}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
+background-image:radial-gradient(1200px 700px at 15% -10%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%),radial-gradient(900px 600px at 100% 110%,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 60%);background-attachment:fixed}
+h1,h2,h3,.brand{font-family:Cinzel,serif;letter-spacing:.04em}
 button,input,select,textarea{font:inherit;color:inherit}
-::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#3b3025;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
-
-/* ---- Ефекти фону ---- */
-#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-#decor{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.fl{position:absolute;opacity:.16;filter:blur(.4px);animation:floaty var(--d,18s) ease-in-out infinite;animation-delay:var(--dl,0s);user-select:none}
-@keyframes floaty{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(24px,-38px) rotate(12deg)}50%{transform:translate(-18px,-70px) rotate(-10deg)}75%{transform:translate(30px,-30px) rotate(8deg)}}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#3b3025;border-radius:8px}
+#fx,#decor,.vig{position:fixed;inset:0;pointer-events:none;z-index:0}#fx{width:100%;height:100%}#decor{overflow:hidden}
+.vig{background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
+.fl{position:absolute;opacity:.15;animation:flt var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes flt{0%,100%{transform:translate(0,0) rotate(0)}30%{transform:translate(24px,-40px) rotate(12deg)}65%{transform:translate(-18px,-70px) rotate(-10deg)}}
 body.nofx #fx,body.nofx #decor{display:none}
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
-
 #app{position:relative;z-index:1;min-height:100vh}
-
-/* ---- Загальні ---- */
-.btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#1a1008;font-weight:600;padding:.7rem 1.2rem;border-radius:12px;cursor:pointer;
-  transition:transform .18s,box-shadow .18s,filter .18s;box-shadow:0 6px 22px -8px var(--accent);position:relative;overflow:hidden}
-.btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px -8px var(--accent);filter:brightness(1.08)}
-.btn:active{transform:translateY(0) scale(.98)}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;filter:grayscale(.5)}
-.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none}
-.btn.ghost:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,163,61,.1)}
-.btn.sm{padding:.4rem .75rem;font-size:.82rem;border-radius:9px}
-.btn.danger{background:linear-gradient(135deg,#d9473a,#8e1f16);color:#fff}
-.btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}
-.btn:hover::after{transform:translateX(120%)}
-input,select,textarea{width:100%;background:rgba(10,8,6,.65);border:1px solid var(--line);border-radius:11px;padding:.7rem .9rem;outline:none;transition:border-color .2s,box-shadow .2s}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,163,61,.14)}
-select option{background:#1a1510}
-label{display:block;font-size:.8rem;color:var(--muted);margin:.8rem 0 .3rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;overflow:hidden}
-.tilt{transition:transform .25s ease,border-color .25s,box-shadow .25s;transform-style:preserve-3d}
-.tilt::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx) var(--my),rgba(232,163,61,.14),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
-.tilt:hover{border-color:rgba(232,163,61,.5);box-shadow:0 18px 40px -18px rgba(0,0,0,.8),0 0 30px -12px var(--accent)}
-.tilt:hover::before{opacity:1}
-.fadeUp{opacity:0;animation:fadeUp .6s cubic-bezier(.2,.8,.2,1) forwards}
-@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-.muted{color:var(--muted)}.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.end{justify-content:flex-end}.grow{flex:1}
-.badge{display:inline-block;font-size:.7rem;padding:.18rem .55rem;border-radius:99px;background:rgba(232,163,61,.15);color:var(--accent);border:1px solid var(--line)}
-.badge.bad{background:rgba(255,107,94,.14);color:var(--bad);border-color:rgba(255,107,94,.35)}
-.badge.ok{background:rgba(111,207,127,.13);color:var(--ok);border-color:rgba(111,207,127,.3)}
-
-/* ---- Вхід ---- */
-.loginWrap{min-height:100vh;display:grid;place-items:center;padding:1.5rem}
-.loginCard{width:min(430px,100%);padding:2.4rem 2rem;text-align:center}
-.loginCard::after{content:"";position:absolute;inset:-2px;border-radius:20px;padding:2px;background:conic-gradient(from var(--ang,0deg),transparent,var(--accent),transparent 40%,var(--accent2),transparent 80%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite;pointer-events:none;opacity:.7}
-@property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}
-@keyframes spin{to{--ang:360deg}}
-.logo{font-size:3.3rem;display:inline-block;animation:bob 4s ease-in-out infinite;filter:drop-shadow(0 0 18px var(--accent))}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
-.loginCard h1{font-size:1.9rem;margin:.6rem 0 .2rem;background:linear-gradient(90deg,var(--accent),#fff3d6,var(--accent));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
-@keyframes shine{to{background-position:200% 0}}
-.loginCard form{text-align:left;margin-top:1.4rem}
-.loginCard .btn{width:100%;margin-top:1.3rem;padding:.9rem}
-.tiny{font-size:.75rem;margin-top:1rem;cursor:pointer;text-decoration:underline;opacity:.7}
-
-/* ---- Шапка ---- */
-header.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(11,9,7,.72);border-bottom:1px solid var(--line)}
-.topIn{max-width:1250px;margin:auto;padding:.8rem 1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.brand{font-size:1.25rem;font-weight:900;display:flex;align-items:center;gap:.5rem;color:var(--accent)}
-.brand span{font-size:1.5rem;animation:bob 4s ease-in-out infinite}
-nav{display:flex;gap:.3rem;margin-left:1rem;flex-wrap:wrap}
-nav button{background:none;border:0;padding:.55rem 1rem;border-radius:10px;color:var(--muted);cursor:pointer;transition:.2s;position:relative}
-nav button:hover{color:var(--text);background:rgba(232,163,61,.08)}
-nav button.on{color:#1a1008;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:600}
-.userChip{margin-left:auto;display:flex;align-items:center;gap:.6rem}
-.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#1a1008;font-weight:700}
-main{max-width:1250px;margin:auto;padding:1.6rem 1.2rem 4rem}
-.pageTitle{display:flex;align-items:end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem}
-.pageTitle h2{font-size:1.7rem}
-
-/* ---- Статистика ---- */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1.4rem}
-.stat{padding:1.1rem 1.2rem}
-.stat b{display:block;font-size:1.9rem;font-family:'Cinzel',serif;color:var(--accent)}
-.stat span{font-size:.8rem;color:var(--muted)}
-
-/* ---- Фільтри ---- */
-.bar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:1.2rem}
-.bar input{max-width:320px}
-.chips{display:flex;gap:.45rem;flex-wrap:wrap}
-.chip{background:rgba(30,24,18,.6);border:1px solid var(--line);color:var(--muted);padding:.4rem .85rem;border-radius:99px;cursor:pointer;font-size:.85rem;transition:.2s}
-.chip:hover{color:var(--text);border-color:var(--accent)}
-.chip.on{background:rgba(232,163,61,.18);color:var(--accent);border-color:var(--accent)}
-
-/* ---- Сітки ---- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.1rem}
-.grid.big{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
-.it{padding:1.2rem}
-.it .ic{font-size:2.2rem;display:inline-block;transition:transform .3s}
-.it:hover .ic{transform:scale(1.2) rotate(-8deg)}
-.it h3{font-size:1.05rem;margin:.5rem 0 .15rem;letter-spacing:.02em}
-.qty{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;margin-top:.6rem}
-.qty small{font-size:.8rem;color:var(--muted);font-family:Inter}
-.meter{height:6px;border-radius:9px;background:rgba(255,255,255,.07);margin-top:.5rem;overflow:hidden}
-.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:9px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
-.meter.low i{background:linear-gradient(90deg,#8e1f16,var(--bad))}
-.ingr{list-style:none;margin:.8rem 0;display:grid;gap:.35rem}
-.ingr li{display:flex;justify-content:space-between;gap:.5rem;font-size:.88rem;padding:.4rem .6rem;border-radius:9px;background:rgba(0,0,0,.25)}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#1a1008;font-weight:600;padding:.65rem 1.15rem;border-radius:12px;cursor:pointer;transition:.18s;position:relative;overflow:hidden;box-shadow:0 6px 22px -8px var(--accent)}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:grayscale(.5)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.ghost:hover{border-color:var(--accent)}
+.btn.sm{padding:.35rem .7rem;font-size:.8rem;border-radius:9px}.btn.danger{background:linear-gradient(135deg,#d9473a,#8e1f16);color:#fff}
+.btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}.btn:hover::after{transform:translateX(120%)}
+input,select,textarea{width:100%;background:rgba(10,8,6,.65);border:1px solid var(--line);border-radius:11px;padding:.65rem .85rem;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+select option{background:#1a1510}label{display:block;font-size:.8rem;color:var(--muted);margin:.75rem 0 .3rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.tilt{transition:transform .25s,border-color .25s,box-shadow .25s}.tilt::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%);opacity:0;transition:.3s;pointer-events:none}
+.tilt:hover{border-color:var(--accent);box-shadow:0 18px 40px -18px #000,0 0 30px -12px var(--accent)}.tilt:hover::before{opacity:1}
+.fu{opacity:0;animation:fu .55s cubic-bezier(.2,.8,.2,1) forwards}@keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
+.muted{color:var(--muted)}.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.end{justify-content:flex-end}.grow{flex:1}.sb{justify-content:space-between}
+.badge{display:inline-block;font-size:.7rem;padding:.16rem .55rem;border-radius:99px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid var(--line)}
+.badge.bad{background:rgba(255,107,94,.14);color:var(--bad);border-color:rgba(255,107,94,.35)}.badge.ok{background:rgba(111,207,127,.13);color:var(--ok);border-color:rgba(111,207,127,.3)}
+.lw{min-height:100vh;display:grid;place-items:center;padding:1.5rem}.lc{width:min(430px,100%);padding:2.3rem 2rem;text-align:center}
+.lc::after{content:"";position:absolute;inset:-2px;border-radius:20px;padding:2px;background:conic-gradient(from var(--ang,0deg),transparent,var(--accent),transparent 40%,var(--accent2),transparent 80%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite;pointer-events:none;opacity:.7}
+@property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}@keyframes spin{to{--ang:360deg}}
+.logo{font-size:3.2rem;display:inline-block;animation:bob 4s ease-in-out infinite;filter:drop-shadow(0 0 18px var(--accent))}@keyframes bob{50%{transform:translateY(-8px) rotate(4deg)}}
+.lc h1{font-size:1.8rem;margin:.5rem 0 .2rem;background:linear-gradient(90deg,var(--accent),#fff3d6,var(--accent));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shn 5s linear infinite}@keyframes shn{to{background-position:200% 0}}
+.lc form{text-align:left;margin-top:1.3rem}.lc .btn{width:100%;margin-top:1.2rem;padding:.85rem}
+header.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 75%,transparent);border-bottom:1px solid var(--line)}
+.topIn{max-width:1250px;margin:auto;padding:.75rem 1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.brand{font-size:1.2rem;font-weight:900;display:flex;gap:.5rem;align-items:center;color:var(--accent)}.brand span{font-size:1.4rem;animation:bob 4s ease-in-out infinite}
+nav{display:flex;gap:.3rem;flex-wrap:wrap;margin-left:.8rem}nav button{background:0;border:0;padding:.5rem .95rem;border-radius:10px;color:var(--muted);cursor:pointer;transition:.2s}
+nav button:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 10%,transparent)}nav button.on{color:#1a1008;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:600}
+.uc{margin-left:auto;display:flex;gap:.5rem;align-items:center}.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#1a1008;font-weight:700;cursor:pointer}
+.bn,.tbar{padding:.6rem 1.2rem;text-align:center;font-size:.88rem;position:relative;z-index:15}
+.bn.info{background:color-mix(in srgb,var(--accent) 16%,#000)}.bn.warn{background:#6b5311}.bn.urgent{background:#7a1c14}
+.tbar{background:color-mix(in srgb,var(--accent) 22%,#000);cursor:pointer;font-weight:500}
+main{max-width:1250px;margin:auto;padding:1.5rem 1.2rem 4rem}
+.pt{display:flex;align-items:end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem}.pt h2{font-size:1.65rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:1rem;margin-bottom:1.3rem}.stat{padding:1.05rem 1.2rem}
+.stat b{display:block;font-size:1.8rem;font-family:Cinzel,serif;color:var(--accent)}.stat span{font-size:.8rem;color:var(--muted)}
+.bar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:1.1rem}.bar input{max-width:300px}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap}.chip{background:rgba(30,24,18,.6);border:1px solid var(--line);color:var(--muted);padding:.38rem .8rem;border-radius:99px;cursor:pointer;font-size:.85rem;transition:.2s}
+.chip:hover{color:var(--text);border-color:var(--accent)}.chip.on{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.1rem}.grid.big{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.it{padding:1.15rem}.it .ic{font-size:2.1rem;display:inline-block;transition:.3s}.it:hover .ic{transform:scale(1.2) rotate(-8deg)}.it h3{font-size:1.05rem;margin:.5rem 0 .15rem}
+.qty{font-family:Cinzel,serif;font-size:1.9rem;font-weight:700;margin-top:.5rem}.qty small{font-size:.8rem;color:var(--muted);font-family:Inter}
+.meter{height:6px;border-radius:9px;background:rgba(255,255,255,.07);margin:.5rem 0;overflow:hidden}.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .8s}.meter.low i{background:var(--bad)}
+.ingr{list-style:none;margin:.7rem 0;display:grid;gap:.3rem}.ingr li{display:flex;justify-content:space-between;gap:.5rem;font-size:.86rem;padding:.38rem .6rem;border-radius:9px;background:rgba(0,0,0,.28)}
 .ingr li.ok b{color:var(--ok)}.ingr li.no b{color:var(--bad)}
-.stepper{display:flex;align-items:center;gap:.4rem}
-.stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.3);cursor:pointer;font-size:1rem;transition:.15s}
-.stepper button:hover{border-color:var(--accent);color:var(--accent)}
-.stepper span{min-width:34px;text-align:center;font-weight:600}
-.result{margin:.4rem 0;color:var(--accent);font-size:.9rem}
-
-/* ---- Таблиці / Адмін ---- */
-.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem}
-.tabs button{background:rgba(30,24,18,.6);border:1px solid var(--line);padding:.55rem 1rem;border-radius:11px;color:var(--muted);cursor:pointer;transition:.2s}
-.tabs button:hover{color:var(--text);border-color:var(--accent)}
-.tabs button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1008;font-weight:600;border-color:transparent}
-.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
-.tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:.78rem;padding:.7rem .8rem;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.06em}
-.tbl td{padding:.7rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
-.tbl tr:hover td{background:rgba(232,163,61,.05)}
-.tblWrap{overflow-x:auto;padding:.4rem}
-.acts{display:flex;gap:.35rem;flex-wrap:wrap}
-.logTxt{max-width:520px;color:var(--muted)}
-.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
-.empty .big{font-size:3rem;display:block;animation:bob 4s ease-in-out infinite}
-.ingRow{display:grid;grid-template-columns:1fr 90px 36px;gap:.4rem;margin-bottom:.4rem}
-.chk{display:flex;align-items:center;gap:.6rem;margin-top:.9rem;color:var(--text);font-size:.9rem;cursor:pointer}
-.chk input{width:auto}
-
-/* ---- Модальне вікно / Тости ---- */
-.modal{position:fixed;inset:0;z-index:100;background:rgba(5,3,2,.7);backdrop-filter:blur(6px);display:grid;place-items:center;padding:1rem;animation:fade .2s;overflow:auto}
-.modal.out{opacity:0;transition:opacity .2s}
-@keyframes fade{from{opacity:0}}
-.mbox{background:linear-gradient(160deg,#241c14,#17120d);border:1px solid var(--line);border-radius:20px;padding:1.6rem;width:min(520px,100%);max-height:92vh;overflow:auto;animation:pop .3s cubic-bezier(.2,1.2,.3,1);box-shadow:0 30px 80px -20px #000}
-@keyframes pop{from{transform:scale(.88) translateY(20px);opacity:0}}
-.mbox h3{margin-bottom:.4rem;font-size:1.3rem;color:var(--accent)}
-.mbox form .row.end{margin-top:1.3rem}
-#toasts{position:fixed;right:1rem;bottom:1rem;z-index:200;display:grid;gap:.6rem}
-.toast{background:#211a13;border:1px solid var(--line);border-left:4px solid var(--ok);padding:.8rem 1.1rem;border-radius:12px;max-width:340px;animation:slideIn .35s cubic-bezier(.2,1,.3,1);box-shadow:0 14px 40px -10px #000}
-.toast.err{border-left-color:var(--bad)}
-@keyframes slideIn{from{transform:translateX(120%);opacity:0}}
-.loader{width:42px;height:42px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot 1s linear infinite;margin:4rem auto}
-@keyframes rot{to{transform:rotate(360deg)}}
-
-@media(max-width:700px){nav{margin-left:0;order:3;width:100%}.userChip{margin-left:auto}.pageTitle h2{font-size:1.35rem}}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+.stp{display:flex;align-items:center;gap:.35rem}.stp button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.3);cursor:pointer}.stp button:hover{border-color:var(--accent);color:var(--accent)}.stp span{min-width:32px;text-align:center;font-weight:600}
+.res{margin:.4rem 0;color:var(--accent);font-size:.9rem}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.1rem}.tabs button{background:rgba(30,24,18,.6);border:1px solid var(--line);padding:.5rem .95rem;border-radius:11px;color:var(--muted);cursor:pointer;transition:.2s}
+.tabs button:hover{color:var(--text);border-color:var(--accent)}.tabs button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1008;font-weight:600;border-color:transparent}
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem}.tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:.76rem;padding:.65rem .8rem;border-bottom:1px solid var(--line)}
+.tbl td{padding:.62rem .8rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}.tbl tr:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.tw{overflow-x:auto;padding:.3rem}.acts{display:flex;gap:.3rem;flex-wrap:wrap}.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}.empty .big{font-size:2.8rem;display:block;animation:bob 4s ease-in-out infinite}
+.chk{display:flex;align-items:center;gap:.55rem;margin-top:.8rem;color:var(--text);font-size:.9rem;cursor:pointer}.chk input{width:auto}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(5,3,2,.72);backdrop-filter:blur(6px);display:grid;place-items:center;padding:1rem;overflow:auto;animation:fade .2s}@keyframes fade{from{opacity:0}}
+.mbox{background:linear-gradient(160deg,#241c14,#17120d);border:1px solid var(--line);border-radius:20px;padding:1.5rem;width:min(560px,100%);max-height:92vh;overflow:auto;animation:pop .3s cubic-bezier(.2,1.2,.3,1)}.mbox.w{width:min(860px,100%)}
+@keyframes pop{from{transform:scale(.9) translateY(20px);opacity:0}}.mbox h3{color:var(--accent);margin-bottom:.4rem;font-size:1.25rem}.mbox form .row.end{margin-top:1.2rem}
+#toasts{position:fixed;right:1rem;bottom:1rem;z-index:200;display:grid;gap:.6rem}.toast{background:#211a13;border:1px solid var(--line);border-left:4px solid var(--ok);padding:.75rem 1.05rem;border-radius:12px;max-width:340px;animation:si .35s;box-shadow:0 14px 40px -10px #000}.toast.err{border-left-color:var(--bad)}@keyframes si{from{transform:translateX(120%);opacity:0}}
+.loader{width:40px;height:40px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot 1s linear infinite;margin:4rem auto}@keyframes rot{to{transform:rotate(360deg)}}
+.taxg{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:1.1rem;margin-bottom:1.1rem}@media(max-width:800px){.taxg{grid-template-columns:1fr}}
+.ring{width:176px;height:176px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(255,255,255,.08) 0);display:grid;place-items:center;margin:0 auto;box-shadow:0 0 40px -10px var(--c)}
+.ring>div{width:146px;height:146px;border-radius:50%;background:var(--bg);display:grid;place-items:center;text-align:center;padding:.5rem}.ring b{font-family:Cinzel,serif;font-size:1.05rem}
+.fl2{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem;margin:.5rem 0;font-size:.88rem}.fl2 .n{background:rgba(0,0,0,.3);border:1px solid var(--line);padding:.25rem .6rem;border-radius:9px}.fl2 .o{color:var(--accent);font-weight:600}
+.cg{display:grid;grid-template-columns:7fr 5fr;gap:1.4rem;align-items:start}@media(max-width:900px){.cg{grid-template-columns:1fr}}
+.sticky{position:sticky;top:90px}.ci{width:78px!important;text-align:center;padding:.4rem!important}
+@media(max-width:700px){nav{margin-left:0;order:3;width:100%}}@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
 </style>
 </head>
 <body>
-<canvas id="fx"></canvas>
-<div id="decor"></div>
-<div class="vignette"></div>
-<div id="app"><div class="loader"></div></div>
-<div id="toasts"></div>
-
+<canvas id="fx"></canvas><div id="decor"></div><div class="vig"></div>
+<div id="app"><div class="loader"></div></div><div id="toasts"></div>
 <script>
-/* ============================================================
-   НАЛАШТУВАННЯ: встав сюди URL веб-застосунку Apps Script
-   (або залиш порожнім — сайт сам попросить URL при першому запуску)
-   ============================================================ */
-const API_URL = '';
+/* Встав сюди URL веб-застосунку Apps Script (…/exec) або залиш порожнім — сайт сам запитає при першому запуску */
+const API_URL='https://script.google.com/macros/s/AKfycby0zT3_b6rvgWvLr__-SBrSMjMZnf5pYaXWWXz2Ogzd5R9OsFA2UZ1x2aua-4FT_9Fr/exec';
 
-/* ---------- Базові допоміжні ---------- */
-const $ = (s, r = document) => r.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LS = (() => { try { localStorage.setItem('_t', 1); localStorage.removeItem('_t'); return localStorage; } catch (e) { const m = {}; return { getItem: k => m[k] || null, setItem: (k, v) => m[k] = v, removeItem: k => delete m[k] }; } })();
-let API = API_URL || LS.getItem('api') || '';
-const S = { token: LS.getItem('tk') || '', user: null, cfg: {}, cats: [], items: [], recipes: [], users: [], log: null,
-  view: 'stock', adm: 'items', q: '', cat: 'all', times: {} };
+const $=(s,r=document)=>r.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS=(()=>{try{localStorage.setItem('_t',1);localStorage.removeItem('_t');return localStorage}catch(e){const m={};return{getItem:k=>m[k]||null,setItem:(k,v)=>m[k]=v,removeItem:k=>delete m[k]}}})();
+let API=API_URL||LS.getItem('api')||'';
+let cached={};try{cached=JSON.parse(LS.getItem('cfg')||'{}')}catch(e){}
+const S={token:LS.getItem('tk')||'',me:null,cfg:cached,cats:[],items:[],recipes:[],tax:null,total:0,off:0,view:'stock',sub:'make',adm:'overview',q:'',cat:'all',kind:'all',cy:{},cm:'blocks',cv:{},d:null,x:null};
+const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const num=n=>Number(n||0).toLocaleString('uk-UA'),usd=n=>'$'+Number(n||0).toFixed(2);
+const tf=t=>new Date(+t).toLocaleString('uk-UA',{timeZone:'Europe/Kyiv',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const adm=()=>S.me&&S.me.role==='admin',can=p=>S.me&&(adm()||String(S.me.perms).split(',').includes(p));
+const cat=n=>S.cats.find(c=>c.name===n)||{},qty=n=>(S.items.find(i=>i.name===n)||{qty:0}).qty,isLow=i=>i.min>0&&i.qty<=i.min;
+const PERMS=[{v:'stock',t:'Історія складу'},{v:'stock_edit',t:'Рух складу'},{v:'craft',t:'Крафт'},{v:'tax',t:'Податок'},{v:'log',t:'Журнал'}];
+const THEMES={default:'Класика',saloon:'Салун',noir:'Нуар',newyear:'Новий рік',halloween:'Гелловін'};
 
-async function api(action, data = {}) {
-  if (!API) throw new Error('URL бекенду не налаштовано');
-  let r;
-  try { r = await fetch(API, { method: 'POST', body: JSON.stringify({ action, token: S.token, ...data }) }); }
-  catch (e) { throw new Error('Немає зв\'язку з сервером. Перевір URL та розгортання.'); }
+async function api(action,data={},w){
+  if(!API)throw Error('URL бекенду не задано');
   let j;
-  try { j = await r.json(); } catch (e) { throw new Error('Сервер повернув некоректну відповідь. Перевір розгортання (доступ: Anyone).'); }
-  if (!j.ok) { if (j.code === 'AUTH') { S.user = null; S.token = ''; LS.removeItem('tk'); render(); } throw new Error(j.error || 'Помилка'); }
-  return j;
+  try{j=await(await fetch(API,{method:'POST',body:JSON.stringify({action,token:S.token,data,requestId:w?uid():undefined})})).json()}
+  catch(e){throw Error("Немає зв'язку з сервером. Перевір URL і розгортання (доступ: Усі).")}
+  if(!j.ok){if(j.code==='SESSION_ENDED')out(j.message||j.error);throw Error(j.message||j.error||'Помилка')}
+  const d=j.data;if(d&&d.snap)snap(d.snap);
+  return d&&d.w?d.r:d;
 }
+const W=(a,d)=>api(a,d,1);
+function snap(s){Object.assign(S,{cats:s.cats,items:s.items,recipes:s.recipes,total:s.total,cfg:s.cfg,tax:s.tax,me:s.me});S.off=s.tax.now-Date.now();LS.setItem('cfg',JSON.stringify(s.cfg));theme()}
+function theme(){document.documentElement.dataset.theme=S.cfg.theme||'default';document.body.dataset.tax=S.tax?S.tax.lv:'none';document.title=S.cfg.siteName||'Тютюновий бізнес'}
+function out(m){S.token='';S.me=null;LS.removeItem('tk');render();if(m)toast(m,'err')}
+function toast(m,t){const e=document.createElement('div');e.className='toast '+(t==='err'?'err':'');e.textContent=m;$('#toasts').appendChild(e);setTimeout(()=>{e.style.transition='.4s';e.style.opacity=0;setTimeout(()=>e.remove(),400)},t==='err'?5500:3000)}
 
-function toast(msg, type = 'ok') {
-  const t = document.createElement('div'); t.className = 'toast ' + (type === 'err' ? 'err' : '');
-  t.textContent = msg; $('#toasts').appendChild(t);
-  setTimeout(() => { t.style.transition = '.4s'; t.style.opacity = 0; t.style.transform = 'translateX(120%)'; setTimeout(() => t.remove(), 400); }, type === 'err' ? 5500 : 3000);
-}
+/* ---------- модалки та форми ---------- */
+function modal(html,mount,wide){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="mbox ${wide?'w':''}">${html}</div>`;document.body.appendChild(m);
+  const close=()=>m.remove();m.onmousedown=e=>{if(e.target===m)close()};mount&&mount(m.firstChild,close);return close}
+function fh(f){const v=f.value??'';
+  if(f.type==='checkbox')return`<label class="chk"><input type="checkbox" name="${f.k}" ${v?'checked':''}> ${esc(f.label)}</label>`;
+  if(f.type==='multi')return`<label>${esc(f.label)}</label><div class="row">${f.options.map(o=>`<label class="chk" style="margin:.2rem .7rem 0 0"><input type="checkbox" name="${f.k}" value="${o.v}" ${(v||[]).includes(o.v)?'checked':''}> ${esc(o.t)}</label>`).join('')}</div>`;
+  let i;
+  if(f.type==='select')i=`<select name="${f.k}">${f.options.map(o=>`<option value="${esc(o.v)}" ${String(o.v)===String(v)?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`;
+  else if(f.type==='textarea')i=`<textarea name="${f.k}" rows="${f.rows||3}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
+  else i=`<input name="${f.k}" type="${f.type||'text'}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.type==='number'?'step="any"':''}>`;
+  return`<label>${esc(f.label)}</label>${i}`}
+function form({title,fields,submit='Зберегти',note='',onSubmit}){
+  modal(`<h3>${esc(title)}</h3>${note?`<p class="muted" style="font-size:.85rem">${esc(note)}</p>`:''}<form>${fields.map(fh).join('')}<div class="row end"><button type="button" class="btn ghost" data-x>Скасувати</button><button class="btn">${esc(submit)}</button></div></form>`,(b,close)=>{
+    b.querySelector('[data-x]').onclick=close;
+    b.querySelector('form').onsubmit=async e=>{e.preventDefault();const v={};
+      fields.forEach(f=>{const els=[...b.querySelectorAll(`[name="${f.k}"]`)];v[f.k]=f.type==='checkbox'?els[0].checked:f.type==='multi'?els.filter(x=>x.checked).map(x=>x.value):f.type==='number'?Number(els[0].value):els[0].value});
+      const bt=b.querySelector('form .btn:not(.ghost)');bt.disabled=true;
+      try{await onSubmit(v);close()}catch(err){toast(err.message,'err');bt.disabled=false}};
+    const f=b.querySelector('input,select,textarea');f&&f.focus()})}
+function ask(text,yes,label='Видалити'){modal(`<h3>Підтвердження</h3><p style="margin:.8rem 0 1.2rem">${esc(text)}</p><div class="row end"><button class="btn ghost" data-n>Скасувати</button><button class="btn danger" data-y>${esc(label)}</button></div>`,(b,c)=>{b.querySelector('[data-n]').onclick=c;b.querySelector('[data-y]').onclick=async()=>{try{await yes();c()}catch(e){toast(e.message,'err')}}})}
+const T=(h,r)=>`<div class="card tw"><table class="tbl"><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${h.length}" class="empty">Порожньо</td></tr>`}</table></div>`;
+const B=(a,i,t,c='ghost')=>`<button class="btn sm ${c}" data-a="${a}" data-i="${esc(i)}">${t}</button>`;
+const dl=(n,csv)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=n;a.click()};
+const catOpts=k=>S.cats.filter(c=>!k||c.kind===k).map(c=>({v:c.name,t:c.icon+' '+c.name}));
 
-function applyTheme() {
-  const c = S.cfg || {}, r = document.documentElement.style;
-  if (/^#[0-9a-f]{6}$/i.test(c.accent || '')) r.setProperty('--accent', c.accent);
-  if (/^#[0-9a-f]{6}$/i.test(c.accent2 || '')) r.setProperty('--accent2', c.accent2);
-  document.body.classList.toggle('nofx', c.fx === 'off');
-  document.title = (c.siteName || 'Tobacco Shop') + ' — RP';
+/* ---------- рендер ---------- */
+function render(){
+  const A=$('#app');theme();
+  if(!S.me)return login(A);
+  const nav=[['stock','📦 Склад']];
+  if(can('craft'))nav.push(['craft','⚒️ Крафт'],['calc','🧮 Калькулятор']);
+  if(can('tax'))nav.push(['tax','🧾 Податок']);if(can('log'))nav.push(['log','📜 Журнал']);if(adm())nav.push(['admin','⚙️ Адмін']);
+  if(!nav.some(n=>n[0]===S.view))S.view='stock';
+  const c=S.cfg,tl=S.tax&&S.tax.lv,showB=c.banner&&LS.getItem('bn')!==c.bannerId;
+  A.innerHTML=`<header class="top"><div class="topIn"><div class="brand"><span>🚬</span>${esc(c.siteName||'Тютюновий бізнес')}</div>
+  <nav>${nav.map(([k,t])=>`<button data-a="nav" data-i="${k}" class="${S.view===k?'on':''}">${t}</button>`).join('')}</nav>
+  <div class="uc"><button class="btn ghost sm" data-a="mus" title="Музика" id="mb">🎵</button><div class="av" data-a="prof" title="Профіль">${esc((S.me.name||'?')[0].toUpperCase())}</div>
+  <div style="line-height:1.15"><div style="font-size:.88rem">${esc(S.me.name)}</div><div class="muted" style="font-size:.7rem">${esc(adm()?'Адміністратор':S.me.roleName||'Працівник')}</div></div>
+  <button class="btn ghost sm" data-a="out">Вийти</button></div></div></header>
+  ${showB?`<div class="bn ${esc(c.bannerKind)}">📢 ${esc(c.banner)} <span style="cursor:pointer;margin-left:.8rem;opacity:.7" data-a="bnx">✕</span></div>`:''}
+  ${['warn','crit','over'].includes(tl)&&can('tax')?`<div class="tbar" data-a="nav" data-i="tax">${tl==='over'?'🚨 ПОДАТОК ПРОСТРОЧЕНО':tl==='crit'?'🚨 Терміново сплатити податок':'⚠️ Скоро потрібно сплатити податок'} — до ${tf(S.tax.cov)}. Натисни, щоб відкрити</div>`:''}
+  <main id="main"></main>`;
+  main();
 }
+let mt=0;
+async function main(){
+  const m=$('#main');if(!m)return;const t=++mt;
+  m.innerHTML='<div class="loader"></div>';
+  let h;try{h=await V[S.view]()}catch(e){h=`<div class="empty"><span class="big">⚠️</span>${esc(e.message)}</div>`}
+  if(t!==mt)return;m.innerHTML=h;({stock:rStock,craft:rCraft,calc:rCalc})[S.view]?.();
+}
+function login(A){
+  A.innerHTML=`<div class="lw"><div class="card lc fu"><div class="logo">🚬</div><h1>${esc(S.cfg.siteName||'Тютюновий бізнес')}</h1><p class="muted">${esc(S.cfg.tagline||'')}</p>
+  <form id="lf"><label>Логін</label><input name="login" autocomplete="username" required autofocus><label>Пароль</label><input name="password" type="password" autocomplete="current-password" required><button class="btn">Увійти</button></form>
+  <div class="muted" style="font-size:.75rem;margin-top:1rem;cursor:pointer;text-decoration:underline;opacity:.7" data-a="url">⚙ URL бекенду</div></div></div>`;
+  $('#lf').onsubmit=async e=>{e.preventDefault();const b=$('#lf .btn');b.disabled=true;b.textContent='Входжу…';
+    try{const j=await api('login',{login:e.target.login.value,password:e.target.password.value});S.token=j.token;LS.setItem('tk',j.token);S.view='stock';render();toast('Вітаю, '+j.user.name+'!')}
+    catch(err){toast(err.message,'err');b.disabled=false;b.textContent='Увійти'}}}
+function askUrl(){form({title:'URL бекенду',note:'Посилання веб-застосунку Apps Script (закінчується на /exec).',fields:[{k:'u',label:'URL',value:API,ph:'https://script.google.com/macros/s/…/exec'}],onSubmit:async v=>{API=v.u.trim();LS.setItem('api',API);start()}})}
 
-/* ---------- Модалки та форми ---------- */
-function modal(html, onMount) {
-  const m = document.createElement('div'); m.className = 'modal';
-  m.innerHTML = `<div class="mbox">${html}</div>`; document.body.appendChild(m);
-  const close = () => { m.classList.add('out'); setTimeout(() => m.remove(), 200); };
-  m.addEventListener('mousedown', e => { if (e.target === m) close(); });
-  onMount && onMount(m.querySelector('.mbox'), close);
-  return close;
-}
-function fieldHtml(f) {
-  const v = f.value ?? '';
-  if (f.type === 'checkbox') return `<label class="chk"><input type="checkbox" name="${f.k}" ${f.value ? 'checked' : ''}> ${esc(f.label)}</label>`;
-  let inp;
-  if (f.type === 'select') inp = `<select name="${f.k}">${f.options.map(o => `<option value="${esc(o.v)}" ${String(o.v) === String(v) ? 'selected' : ''}>${esc(o.t)}</option>`).join('')}</select>`;
-  else if (f.type === 'textarea') inp = `<textarea name="${f.k}" rows="3" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
-  else inp = `<input name="${f.k}" type="${f.type || 'text'}" value="${esc(v)}" placeholder="${esc(f.ph || '')}" ${f.type === 'number' ? 'step="any"' : ''} ${f.req ? 'required' : ''} ${f.type === 'color' ? 'style="height:44px;padding:.2rem"' : ''}>`;
-  return `<label>${esc(f.label)}</label>${inp}`;
-}
-function form({ title, fields, submit = 'Зберегти', note = '', onSubmit }) {
-  modal(`<h3>${esc(title)}</h3>${note ? `<p class="muted" style="font-size:.85rem">${esc(note)}</p>` : ''}<form>${fields.map(fieldHtml).join('')}<div class="row end"><button type="button" class="btn ghost" data-x>Скасувати</button><button class="btn">${esc(submit)}</button></div></form>`,
-    (box, close) => {
-      box.querySelector('[data-x]').onclick = close;
-      box.querySelector('form').onsubmit = async e => {
-        e.preventDefault(); const v = {};
-        fields.forEach(f => { const el = box.querySelector(`[name="${f.k}"]`); v[f.k] = f.type === 'checkbox' ? el.checked : f.type === 'number' ? Number(el.value) : el.value; });
-        const b = box.querySelector('form .btn:not(.ghost)'); b.disabled = true;
-        try { await onSubmit(v); close(); } catch (err) { toast(err.message, 'err'); b.disabled = false; }
-      };
-      const first = box.querySelector('input,select,textarea'); first && first.focus();
-    });
-}
-function confirmBox(text, onYes, yes = 'Видалити') {
-  modal(`<h3>Підтвердження</h3><p style="margin:.8rem 0 1.2rem">${esc(text)}</p><div class="row end"><button class="btn ghost" data-n>Скасувати</button><button class="btn danger" data-y>${esc(yes)}</button></div>`,
-    (box, close) => { box.querySelector('[data-n]').onclick = close; box.querySelector('[data-y]').onclick = async () => { try { await onYes(); close(); } catch (e) { toast(e.message, 'err'); } }; });
-}
+/* ---------- склад ---------- */
+const V={};
+V.stock=()=>{const it=S.items,prod=it.filter(i=>cat(i.category).kind!=='raw').reduce((a,i)=>a+i.qty,0);
+  return`<div class="pt fu"><div><h2>Склад</h2><span class="muted">Готова продукція та сировина</span></div><div class="row">${can('stock_edit')?'<button class="btn sm" data-a="bulk">📥 Масове оновлення</button>':''}${can('stock')?'<button class="btn ghost sm" data-a="hist">📜 Історія руху</button>':''}</div></div>
+  <div class="stats">${[['Позицій',it.length],['Всього одиниць',num(S.total)],['Готової продукції',num(prod)],['Закінчується',it.filter(isLow).length]].map((s,i)=>`<div class="card stat tilt fu" style="animation-delay:${i*.06}s"><b>${s[1]}</b><span>${s[0]}</span></div>`).join('')}</div>
+  <div class="bar"><input id="q" placeholder="🔍 Пошук…" value="${esc(S.q)}" oninput="S.q=this.value;rStock()"><div class="chips">${[['all','Все'],['product','🚬 Готова продукція'],['raw','🌿 Сировина']].map(([k,t])=>`<span class="chip ${S.kind===k?'on':''}" data-a="kind" data-i="${k}">${t}</span>`).join('')}</div></div>
+  <div class="chips" style="margin-bottom:1.1rem">${chips(S.cats.map(c=>c))}</div><div id="list"></div>`};
+const chips=cs=>`<span class="chip ${S.cat==='all'?'on':''}" data-a="cat" data-i="all">Всі категорії</span>`+cs.map(c=>`<span class="chip ${S.cat===c.name?'on':''}" data-a="cat" data-i="${esc(c.name)}">${esc(c.icon)} ${esc(c.name)}</span>`).join('');
+function rStock(){const el=$('#list');if(!el)return;const q=S.q.toLowerCase();
+  const l=S.items.filter(i=>(S.kind==='all'||(cat(i.category).kind||'product')===S.kind)&&(S.cat==='all'||i.category===S.cat)&&(!q||(i.name+i.note+i.loc).toLowerCase().includes(q)));
+  const mx=Math.max(1,...l.map(i=>i.qty));
+  el.innerHTML=l.length?`<div class="grid">${l.map((i,n)=>`<div class="card it tilt fu" style="animation-delay:${Math.min(n,14)*.035}s"><div class="row sb"><span class="ic">${esc(cat(i.category).icon||'📦')}</span>${isLow(i)?'<span class="badge bad">Мало!</span>':'<span class="badge ok">В наявності</span>'}</div>
+  <h3>${esc(i.name)}</h3><div class="muted" style="font-size:.8rem">${esc(i.category)}${i.loc?' · 📍'+esc(i.loc):''}</div>${i.note?`<div class="muted" style="font-size:.8rem;margin-top:.25rem">${esc(i.note)}</div>`:''}
+  <div class="qty">${num(i.qty)} <small>${esc(i.unit)}${i.min?' · мін. '+i.min:''}</small></div><div class="meter ${isLow(i)?'low':''}"><i style="width:${Math.min(100,i.qty/mx*100)}%"></i></div>
+  ${can('stock_edit')?`<div class="row"><button class="btn sm ghost" data-a="mv" data-i="${i.id}">± Рух</button><button class="btn sm ghost" data-a="mn" data-i="${i.id}">🔔 Поріг</button></div>`:''}</div>`).join('')}</div>`:'<div class="empty"><span class="big">🍂</span>Нічого не знайдено</div>'}
 
-/* ---------- Дані ---------- */
-function applyState(j) {
-  if (j.user) S.user = j.user; if (j.settings) S.cfg = j.settings;
-  if (j.categories) S.cats = j.categories; if (j.items) S.items = j.items;
-  if (j.recipes) S.recipes = j.recipes; if (j.users) S.users = j.users;
-  applyTheme();
-}
-async function load() { applyState(await api('state')); }
-const isAdmin = () => S.user && S.user.role === 'admin';
-const itemById = id => S.items.find(i => i.id === id);
-const catName = id => (S.cats.find(c => c.id === id) || {}).name || '—';
-const catIcon = id => (S.cats.find(c => c.id === id) || {}).icon || '';
-const catsOf = t => S.cats.filter(c => c.type === t);
-const isLow = i => i.minQty > 0 && i.qty <= i.minQty;
-const num = n => Number(n).toLocaleString('uk-UA');
+/* ---------- крафт + схема ---------- */
+V.craft=()=>`<div class="pt fu"><div><h2>Крафт</h2><span class="muted">1 цикл = 1 блок. Склад списується автоматично</span></div></div>
+  <div class="tabs"><button data-a="sub" data-i="make" class="${S.sub==='make'?'on':''}">⚒️ Створити</button><button data-a="sub" data-i="scheme" class="${S.sub==='scheme'?'on':''}">🧬 Схема крафту</button></div>
+  <div class="bar"><input id="q" placeholder="🔍 Пошук рецепта…" value="${esc(S.q)}" oninput="S.q=this.value;rCraft()"><div class="chips">${chips(S.cats.filter(c=>S.recipes.some(r=>r.cat===c.name)))}</div></div><div id="list"></div>`;
+const mx=r=>Math.min(...Object.entries(r.ing).map(([n,q])=>Math.floor(qty(n)/q)));
+const live=()=>S.recipes.filter(r=>r.enabled&&!r.archived);
+function rCraft(){const el=$('#list');if(!el)return;const q=S.q.toLowerCase();
+  const l=live().filter(r=>(S.cat==='all'||r.cat===S.cat)&&(!q||(r.name+r.out).toLowerCase().includes(q)));
+  if(!l.length){el.innerHTML='<div class="empty"><span class="big">⚒️</span>Рецептів немає</div>';return}
+  if(S.sub==='scheme'){const outs=new Set(S.recipes.map(r=>r.out));
+    el.innerHTML=l.map((r,n)=>`<div class="card it fu" style="animation-delay:${Math.min(n,10)*.04}s"><div class="row sb"><h3>${esc(r.name)}</h3><span class="muted" style="font-size:.78rem">уміння ${r.skill} · ${r.time}с · v${r.version}</span></div>
+    <div class="fl2">${Object.entries(r.ing).map(([n,q])=>`<span class="n">${outs.has(n)?'🔗 ':''}${esc(n)} ×${num(q)}</span>`).join('<span class="o">＋</span>')}<span class="o">➜</span><span class="n" style="border-color:var(--accent)">${esc(r.out)} ×${r.yield} ${esc(r.unit)}</span></div></div>`).join('');return}
+  el.innerHTML=`<div class="grid big">${l.map((r,n)=>{const t=S.cy[r.id]||1,m=mx(r),ok=m>=t,low=!adm()&&S.me.skill<r.skill;
+    return`<div class="card it tilt fu" style="animation-delay:${Math.min(n,12)*.05}s"><div class="row sb"><span class="ic">${esc(cat(r.cat).icon||'⚒️')}</span><span class="badge ${m>0?'ok':'bad'}">${m>0?'Можна: '+m:'Немає матеріалів'}</span></div>
+    <h3>${esc(r.name)}</h3><div class="muted" style="font-size:.8rem">${esc(r.cat)} · уміння ${r.skill}${r.time?' · '+r.time+'с':''}</div>
+    <div class="res">➜ <b>${esc(r.out)} ×${num(r.yield*t)}</b> ${esc(r.unit)}</div>
+    <ul class="ingr">${Object.entries(r.ing).map(([n,q])=>`<li class="${qty(n)>=q*t?'ok':'no'}"><span>${esc(n)}</span><b>${num(qty(n))} / ${num(q*t)}</b></li>`).join('')}</ul>
+    <div class="row sb"><div class="stp"><button data-a="cy" data-i="${r.id}" data-d="-1">−</button><span>${t}</span><button data-a="cy" data-i="${r.id}" data-d="1">+</button><button data-a="cy" data-i="${r.id}" data-d="max" title="Максимум">⤒</button></div>
+    <button class="btn" data-a="craft" data-i="${r.id}" ${ok&&!low?'':'disabled'}>${low?'Мало вміння':ok?'⚒️ Створити':'Не вистачає'}</button></div></div>`}).join('')}</div>`}
 
-/* ---------- Рендер ---------- */
-function render() {
-  const app = $('#app');
-  if (!S.user) return renderLogin(app);
-  const nav = [['stock', '📦 Склад'], ['craft', '⚒️ Крафт']]; if (isAdmin()) nav.push(['admin', '⚙️ Адмін-панель']);
-  app.innerHTML = `<header class="top"><div class="topIn">
-    <div class="brand"><span>🚬</span>${esc(S.cfg.siteName || 'Tobacco Shop')}</div>
-    <nav>${nav.map(([k, t]) => `<button data-act="nav" data-v="${k}" class="${S.view === k ? 'on' : ''}">${t}</button>`).join('')}</nav>
-    <div class="userChip"><div class="avatar">${esc((S.user.name || '?')[0].toUpperCase())}</div>
-      <div style="line-height:1.15"><div style="font-size:.9rem">${esc(S.user.name)}</div><div class="muted" style="font-size:.72rem">${isAdmin() ? 'Адміністратор' : 'Працівник'}</div></div>
-      <button class="btn ghost sm" data-act="pass">🔑</button><button class="btn ghost sm" data-act="logout">Вийти</button></div>
-  </div></header><main id="main"></main>`;
-  renderMain();
-}
-function renderMain() {
-  const m = $('#main'); if (!m) return;
-  if (S.view === 'stock') m.innerHTML = viewStock();
-  else if (S.view === 'craft') m.innerHTML = viewCraft();
-  else if (S.view === 'admin' && isAdmin()) m.innerHTML = viewAdmin();
-  if (S.view === 'stock') renderStockList(); if (S.view === 'craft') renderCraftList();
-}
+/* ---------- калькулятор ---------- */
+const blocks=r=>{const v=S.cv[r.id]||0;return S.cm==='blocks'?v:Math.ceil(v/r.yield)};
+V.calc=()=>`<div class="pt fu"><div><h2>Калькулятор крафту</h2><span class="muted">Скільки сировини потрібно і чи вистачає її на складі</span></div>
+  <div class="row"><div class="tabs" style="margin:0"><button data-a="cmode" data-i="blocks" class="${S.cm==='blocks'?'on':''}">За блоками</button><button data-a="cmode" data-i="items" class="${S.cm==='items'?'on':''}">За штуками</button></div>
+  <button class="btn ghost sm" data-a="cload">📂 Плани</button><button class="btn ghost sm" data-a="creset">↺ Скинути</button></div></div>
+  <div class="cg"><div id="cl" style="display:grid;gap:1rem"></div><div class="sticky"><div class="card" style="padding:1.2rem" id="csum"></div></div></div>`;
+function rCalc(){
+  $('#cl').innerHTML=live().map(r=>{const v=S.cv[r.id]||0,b=blocks(r);return`<div class="card it tilt"><div class="row sb"><div><h3>${esc(r.name)}</h3><div class="muted" style="font-size:.78rem">1 блок = ${r.yield} ${esc(r.unit)}</div>
+  <div class="fl2">${Object.entries(r.ing).map(([n,q])=>`<span class="n">${esc(n)} ${num(q)}</span>`).join('')}</div></div>
+  <div style="text-align:right"><div class="stp"><button data-a="cc" data-i="${r.id}" data-d="-1">−</button><input class="ci" type="number" min="0" data-ci="${r.id}" value="${v||''}" placeholder="0"><button data-a="cc" data-i="${r.id}" data-d="1">+</button></div>
+  <div class="row end" style="margin-top:.4rem;gap:.25rem">${[5,10].map(k=>`<button class="btn sm ghost" data-a="cc" data-i="${r.id}" data-d="${k}">+${k}</button>`).join('')}</div>
+  ${S.cm==='items'&&v?`<div class="badge" style="margin-top:.4rem">Блоків: ${b} → ${b*r.yield} ${esc(r.unit)}</div>`:''}</div></div></div>`}).join('');
+  rSum()}
+function calcTot(){const t={};let b=0;live().forEach(r=>{const n=blocks(r);b+=n;Object.entries(r.ing).forEach(([k,q])=>t[k]=(t[k]||0)+q*n)});return{t:Object.entries(t).filter(x=>x[1]>0),b}}
+function rSum(){const{t,b}=calcTot(),el=$('#csum');if(!el)return;const g=t.reduce((a,x)=>a+x[1],0),lack=t.filter(([n,q])=>qty(n)<q).length;
+  el.innerHTML=`<div class="row sb"><h3>Сумарні ресурси</h3><span class="badge">Блоків: ${b}</span></div>`+(b?`<div style="display:grid;gap:.45rem;margin:1rem 0">${t.map(([n,q])=>`<div class="row sb" style="padding:.55rem .75rem;border-radius:10px;background:rgba(0,0,0,.3)"><span>${esc(n)}</span><span><b style="color:var(--accent)">${num(q)}</b> <small class="${qty(n)>=q?'badge ok':'badge bad'}">на складі ${num(qty(n))}${qty(n)<q?' · бракує '+num(q-qty(n)):''}</small></span></div>`).join('')}</div>
+  <div class="row sb" style="margin-bottom:1rem"><span class="muted">Загальна сума ресурсів</span><b style="font-family:Cinzel,serif;color:var(--accent)">${num(g)} шт.</b></div>${lack?`<p style="color:var(--bad);font-size:.85rem;margin-bottom:.8rem">⚠️ Не вистачає ${lack} позиц.</p>`:'<p style="color:var(--ok);font-size:.85rem;margin-bottom:.8rem">✅ Сировини на складі достатньо</p>'}
+  <div class="row"><button class="btn grow" data-a="ccopy">📋 Скопіювати</button>${can('craft')?'<button class="btn ghost" data-a="csave">💾 План</button>':''}</div>`:'<div class="empty">Введіть кількість блоків або штук, щоб порахувати сировину.</div>')}
+function calcText(){const{t,b}=calcTot();return'📋 Необхідні ресурси для крафту:\n'+t.map(([n,q])=>`• ${n}: ${num(q)}`).join('\n')+`\n\n📦 Всього блоків: ${b}\n📊 Загальна сума ресурсів: ${num(t.reduce((a,x)=>a+x[1],0))} шт.`}
 
-/* ---- Вхід ---- */
-function renderLogin(app) {
-  app.innerHTML = `<div class="loginWrap"><div class="card loginCard fadeUp">
-    <div class="logo">🚬</div><h1>${esc(S.cfg.siteName || 'Tobacco Shop')}</h1>
-    <p class="muted">${esc(S.cfg.tagline || '')}</p>
-    <form id="lf"><label>Логін</label><input name="login" autocomplete="username" required autofocus>
-    <label>Пароль</label><input name="password" type="password" autocomplete="current-password" required>
-    <button class="btn">Увійти</button></form>
-    <div class="tiny muted" data-act="seturl">⚙ Змінити URL бекенду</div></div></div>`;
-  $('#lf').onsubmit = async e => {
-    e.preventDefault(); const b = $('#lf .btn'); b.disabled = true; b.textContent = 'Входжу…';
-    try {
-      const j = await api('login', { login: e.target.login.value, password: e.target.password.value });
-      S.token = j.token; LS.setItem('tk', j.token); S.user = j.user; await load(); render(); toast('Вітаю, ' + j.user.name + '! ' + (S.cfg.welcome || ''));
-    } catch (err) { toast(err.message, 'err'); b.disabled = false; b.textContent = 'Увійти'; }
-  };
-}
-function askUrl() {
-  form({ title: 'URL бекенду', note: 'Встав посилання веб-застосунку Google Apps Script (закінчується на /exec).',
-    fields: [{ k: 'url', label: 'URL', value: API, ph: 'https://script.google.com/macros/s/.../exec', req: true }],
-    onSubmit: async v => { API = v.url.trim(); LS.setItem('api', API); await boot(); } });
-}
+/* ---------- податок ---------- */
+const LV={none:['Платежів ще не було','#a39682'],ok:['Все гаразд','#6fcf7f'],warn:['Скоро платити','#f2c230'],crit:['Терміново!','#ff5a4a'],over:['Прострочено','#ff3b30']};
+const cd=ms=>{const n=ms<0;ms=Math.abs(ms);const d=ms/864e5|0,h=ms%864e5/36e5|0,m=ms%36e5/6e4|0,s=ms%6e4/1e3|0;return(n?'−':'')+(d?d+'д ':'')+[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')};
+V.tax=async()=>{const j=await api('tax.list'),st=j.state;S.tax=st;S.off=st.now-Date.now();theme();S.d=j.rows;
+  const [lbl,col]=LV[st.lv],p=st.lv==='none'?0:Math.max(0,Math.min(100,st.rem/6048e5*100));
+  return`<div class="pt fu"><div><h2>Податок на бізнес</h2><span class="muted">Тижневий платіж: ${usd(st.weekly)}. Сума автоматично переводиться в дні</span></div></div>
+  <div class="taxg"><div class="card fu" style="padding:1.4rem;text-align:center"><div class="ring" style="--c:${col};--p:${p}"><div><div><b style="color:${col}" id="cd">${st.cov?cd(st.cov-Date.now()-S.off):'—'}</b><div class="muted" style="font-size:.75rem">${lbl}</div></div></div></div>
+  <p style="margin-top:1rem">Сплачено до:<br><b>${st.cov?tf(st.cov):'—'}</b></p>${st.last?`<p class="muted" style="font-size:.8rem;margin-top:.5rem">Останній платіж: ${esc(st.last.payer)}, ${usd(st.last.amount)}</p>`:''}</div>
+  <div class="card fu" style="padding:1.4rem"><h3>Сплатити податок</h3><form id="tf">
+  <div class="row"><div class="grow"><label>Сума ($)</label><input name="amount" type="number" step="any" min="0" value="${st.weekly}" required></div><div class="grow"><label>Хто платить</label><input name="payer" value="${esc(S.me.name)}"></div></div>
+  <label>Примітка</label><input name="note" placeholder="Необов'язково">${adm()?'<label>Дата й час оплати (лише адмін, за замовчуванням — зараз)</label><input name="paidAt" type="datetime-local">':''}
+  <p class="muted" style="font-size:.82rem;margin-top:.7rem" id="days">≈ 7.00 дн.</p><button class="btn" style="margin-top:.8rem">🧾 Відмітити оплату</button></form></div></div>
+  <h3 style="margin:1.2rem 0 .6rem">Історія платежів</h3>${T(['Коли','Хто сплатив','Сума','≈ Днів','Вніс','Примітка',''],j.rows.map(r=>[tf(r.paidAt),esc(r.payer),usd(r.amount),(r.amount/r.weekly*7).toFixed(2),esc(r.by),esc(r.note),adm()?B('taxdel',r.id,'🗑','danger'):'']))}`};
+V.log=async()=>{const l=await api('log.list',{limit:300});return`<div class="pt fu"><div><h2>Журнал дій</h2><span class="muted">${adm()?'Усі дії':'Ваші дії'} · останні ${l.length}</span></div></div>`+T(['Час','Хто','Тип','Деталі'],l.map(r=>[`<span class="muted">${esc(r.time)}</span>`,esc(r.user),`<span class="badge ${r.status==='ok'?'':'bad'}">${esc(r.type)}</span>`,`<span class="muted">${esc(r.desc)}</span>`]))};
 
-/* ---- Склад ---- */
-function viewStock() {
-  const tot = S.items.reduce((a, i) => a + i.qty, 0), low = S.items.filter(isLow).length;
-  return `<div class="pageTitle fadeUp"><div><h2>Склад магазину</h2><span class="muted">Актуальні залишки продукції та сировини</span></div></div>
-  <div class="stats">
-    ${[['Позицій', S.items.length], ['Всього одиниць', num(tot)], ['Закінчується', low], ['Категорій', catsOf('item').length]].map((s, i) =>
-      `<div class="card stat tilt fadeUp" style="animation-delay:${i * .07}s"><b>${s[1]}</b><span>${s[0]}</span></div>`).join('')}
-  </div>
-  <div class="bar"><input id="q" placeholder="🔍 Пошук по складу…" value="${esc(S.q)}" oninput="S.q=this.value;renderStockList()">
-  <div class="chips">${chips('item')}</div></div><div id="list"></div>`;
-}
-function chips(type) {
-  return `<span class="chip ${S.cat === 'all' ? 'on' : ''}" data-act="cat" data-id="all">Всі</span>` +
-    catsOf(type).map(c => `<span class="chip ${S.cat === c.id ? 'on' : ''}" data-act="cat" data-id="${c.id}">${esc(c.icon)} ${esc(c.name)}</span>`).join('');
-}
-function renderStockList() {
-  const el = $('#list'); if (!el) return;
-  const q = S.q.toLowerCase();
-  const list = S.items.filter(i => (S.cat === 'all' || i.categoryId === S.cat) && (!q || (i.name + i.desc).toLowerCase().includes(q)));
-  const max = Math.max(1, ...S.items.map(i => i.qty));
-  el.innerHTML = list.length ? `<div class="grid">${list.map((i, n) => `
-    <div class="card it tilt fadeUp" style="animation-delay:${Math.min(n, 14) * .04}s">
-      <div class="row" style="justify-content:space-between"><span class="ic">${esc(i.icon)}</span>${isLow(i) ? '<span class="badge bad">Мало!</span>' : '<span class="badge ok">В наявності</span>'}</div>
-      <h3>${esc(i.name)}</h3><div class="muted" style="font-size:.8rem">${esc(catIcon(i.categoryId))} ${esc(catName(i.categoryId))}</div>
-      ${i.desc ? `<div class="muted" style="font-size:.82rem;margin-top:.3rem">${esc(i.desc)}</div>` : ''}
-      <div class="qty">${num(i.qty)} <small>${esc(i.unit)}</small></div>
-      <div class="meter ${isLow(i) ? 'low' : ''}"><i style="width:${Math.min(100, i.qty / max * 100)}%"></i></div>
-    </div>`).join('')}</div>` : `<div class="empty"><span class="big">🍂</span>Нічого не знайдено</div>`;
-}
+/* ---------- адмін ---------- */
+const ADM={overview:['📊 Огляд','admin.overview'],users:['👥 Люди','admin.users'],roles:['🎭 Ролі','admin.roles'],items:['📦 Предмети','admin.items'],cats:['🗂 Категорії','admin.cats'],recipes:['⚒️ Рецепти','admin.recipes'],sessions:['🔌 Сесії','admin.sessions'],settings:['🎨 Налаштування','admin.settings'],tg:['✈️ Telegram','admin.tgHistory'],logs:['📜 Журнал','admin.logs'],data:['💾 Дані','admin.sheetsInfo']};
+const EX={users:'admin.roles',tg:'admin.tgInfo'};
+V.admin=async()=>{if(!adm())return'';const[d,x]=await Promise.all([api(ADM[S.adm][1],S.adm==='logs'?{limit:300}:{}),EX[S.adm]?api(EX[S.adm]).catch(e=>({ok:false,error:e.message})):0]);S.d=d;S.x=x;
+  return`<div class="pt fu"><div><h2>Адмін-панель</h2><span class="muted">Повне керування бізнесом</span></div></div><div class="tabs">${Object.entries(ADM).map(([k,[t]])=>`<button data-a="adm" data-i="${k}" class="${S.adm===k?'on':''}">${t}</button>`).join('')}</div><div class="fu">${RA[S.adm](d,x)}</div>`};
+const RA={};
+const st=s=>`<span class="badge ${s==='active'||s===true?'ok':'bad'}">${s==='active'?'Активний':s==='blocked'?'Заблокований':s===true?'Так':s===false?'Ні':esc(s)}</span>`;
+RA.overview=o=>`<div class="stats">${[['Користувачів',o.users],['Онлайн',o.online],['Предметів',o.items],['Одиниць на складі',num(o.units)],['Рецептів',o.recipes],['Крафтів',o.crafts],['Помилок за добу',o.errors],['Податок',LV[o.tax][0]]].map(s=>`<div class="card stat"><b style="font-size:1.4rem">${s[1]}</b><span>${s[0]}</span></div>`).join('')}</div>
+  <p class="muted" style="margin-bottom:1rem">Онлайн: ${o.onlineList.map(esc).join(', ')||'—'} · Сервер v${esc(o.version)} · Telegram: ${o.tg?'підключено':'немає токена'}</p>
+  <div class="card" style="padding:1.2rem;margin-bottom:1rem"><h3>Тема сайту</h3><div class="chips" style="margin-top:.7rem">${Object.entries(THEMES).map(([k,t])=>`<span class="chip ${o.theme===k?'on':''}" data-a="theme" data-i="${k}">${t}</span>`).join('')}</div></div>
+  <div class="row"><button class="btn" data-a="banner">📢 Оголошення для всіх</button><button class="btn ghost" data-a="bnclr">Прибрати оголошення</button></div>`;
+RA.users=(u,rl)=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="uN">＋ Новий користувач</button></div>`+T(['Логін','Ім\'я','Роль','Уміння','Telegram','Стан','Останній вхід','Дії'],u.filter(x=>x.status!=='deleted').map(x=>[`<b>${esc(x.login)}</b>${x.online?' 🟢':''}`,esc(x.name),x.role==='admin'?'<span class="badge">Адмін</span>':esc(x.roleName||'—'),x.skill,esc(x.tg?'@'+x.tg:'—'),st(x.status),`<span class="muted">${esc(x.lastLogin)}</span>`,`<div class="acts">${B('uV',x.id,'👁')}${B('uE',x.id,'✏️')}${B('uR',x.id,'🔑')}${x.id===S.me.id?'':B('uS',x.id,x.status==='active'?'🚫':'✅')+B('uD',x.id,'🗑','danger')}</div>`]));
+RA.roles=r=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="rN">＋ Нова роль</button><span class="muted">Права: ${PERMS.map(p=>p.t).join(', ')}</span></div>`+T(['Роль','Права','Людей','Дії'],r.map(x=>[`<b>${esc(x.name)}</b>`,esc(x.perms.split(',').map(p=>(PERMS.find(q=>q.v===p)||{}).t).filter(Boolean).join(', ')||'—'),x.users,`<div class="acts">${B('rE',x.id,'✏️')}${B('rD',x.id,'🗑','danger')}</div>`]));
+RA.items=i=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="iN">＋ Новий предмет</button></div>`+T(['Назва','Категорія','Кількість','Мін.','Стан','Дії'],i.map(x=>[`<b>${esc(x.name)}</b><div class="muted" style="font-size:.75rem">${esc(x.note)}</div>`,esc(x.category),`${num(x.qty)} ${esc(x.unit)}`,x.min,st(x.active),`<div class="acts">${B('iE',x.id,'✏️')}${x.active?B('iD',x.id,'🗑','danger'):B('iR',x.id,'♻️')}</div>`]));
+RA.cats=c=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="cN">＋ Нова категорія</button></div>`+T(['','Назва','Тип','Дії'],c.map(x=>[`<span style="font-size:1.4rem">${esc(x.icon)}</span>`,`<b>${esc(x.name)}</b>`,x.kind==='raw'?'Сировина':'Готова продукція',`<div class="acts">${B('cE',x.id,'✏️')}${B('cD',x.id,'🗑','danger')}</div>`]));
+RA.recipes=r=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="pN">＋ Новий рецепт</button></div>`+T(['Рецепт','Категорія','Результат','Інгредієнти','Стан','Дії'],r.map(x=>[`<b>${esc(x.name)}</b> <span class="muted">v${x.version}</span>`,esc(x.cat),`${esc(x.out)} ×${x.yield}`,`<span class="muted" style="font-size:.8rem">${Object.entries(x.ing).map(([n,q])=>esc(n)+' ×'+q).join(', ')}</span>`,x.archived?'<span class="badge bad">Архів</span>':x.enabled?'<span class="badge ok">Активний</span>':'<span class="badge bad">Вимкнено</span>',`<div class="acts">${B('pE',x.id,'✏️')}${x.archived?B('pR',x.id,'♻️'):B('pA',x.id,'📦')}${B('pD',x.id,'🗑','danger')}</div>`]));
+RA.sessions=s=>`<div class="row" style="margin-bottom:1rem"><button class="btn danger" data-a="kick" data-k="all">Завершити всі інші сесії</button></div>`+T(['Користувач','Початок','Остання активність','Дії'],s.map(x=>[`<b>${esc(x.user)}</b>`,esc(x.start),esc(x.last),B('kick',x.id,'Завершити','danger')+' '+B('kickU',x.userId,'Усі цього користувача')]));
+const SET=[['siteName','Назва сайту'],['tagline','Підзаголовок'],['idleMinutes','Автовихід за бездіяльності (хв, 0 — вимкнено)','number'],['taxWeekly','Тижневий податок ($)','number'],['taxWarnDays','Жовтий режим за (днів до дедлайну)','number'],['taxCritDays','Червоний режим за (днів)','number'],['lowRepeatH','Повтор оповіщення про залишки (год)','number'],['tgHeartbeatHour','Година щоденної перевірки бота','number'],['tgChat','Telegram Chat ID'],['tgTaxThread','Гілка податку'],['tgAlertThread','Гілка оповіщень'],['tgCheckThread','Гілка перевірки бота']];
+RA.settings=c=>`<div class="card" style="padding:1.3rem;max-width:660px"><form id="sf">${SET.map(([k,l,t])=>fh({k,label:l,type:t,value:c[k]})).join('')}${fh({k:'lowEnabled',type:'checkbox',label:'Оповіщення про малий залишок',value:String(c.lowEnabled)!=='0'})}${fh({k:'tgHeartbeat',type:'checkbox',label:'Щоденне повідомлення «бот працює»',value:String(c.tgHeartbeat)!=='0'})}<button class="btn" style="margin-top:1.2rem">💾 Зберегти</button></form></div>`;
+RA.tg=(h,i)=>`<div class="card" style="padding:1.2rem;margin-bottom:1rem">${i.ok?`<p>🤖 Бот <b>@${esc(i.bot)}</b> · чат <b>${esc(i.chat)}</b> · статус: ${esc(i.status)}</p><p class="muted" style="font-size:.82rem">Гілки: податок №${i.threads.tax}, оповіщення №${i.threads.alert}, перевірка №${i.threads.check}</p>`:`<p style="color:var(--bad)">❌ ${esc(i.error)}</p>`}
+  <div class="row" style="margin-top:.8rem">${['tax','alert','check'].map(k=>`<button class="btn ghost sm" data-a="tgT" data-i="${k}">Тест: ${{tax:'податок',alert:'оповіщення',check:'перевірка'}[k]}</button>`).join('')}<button class="btn sm" data-a="tgS">✉️ Надіслати повідомлення</button><button class="btn sm ghost" data-a="low">📉 Перевірити залишки</button></div></div>`+T(['Час','Гілка','Текст','Стан'],h.map(x=>[esc(x.time),esc(x.kind),`<span class="muted">${esc(x.text)}</span>`,x.status==='sent'?'<span class="badge ok">надіслано</span>':`<span class="badge bad" title="${esc(x.error)}">помилка</span>`]));
+RA.logs=l=>T(['Час','Хто','Тип','Деталі'],l.map(r=>[`<span class="muted">${esc(r.time)}</span>`,esc(r.user),`<span class="badge ${r.status==='ok'?'':'bad'}">${esc(r.type)}</span>`,`<span class="muted">${esc(r.desc)}</span>`]));
+RA.data=s=>`<div class="row" style="margin-bottom:1rem"><button class="btn" data-a="exp">⬇️ Склад (CSV)</button></div>`+T(['Таблиця','Опис','Рядків',''],s.map(x=>[`<b>${esc(x.name)}</b>`,esc(x.desc),x.rows,['Users','Sessions'].includes(x.name)?'':B('expS',x.name,'⬇️ CSV')]));
 
-/* ---- Крафт ---- */
-function viewCraft() {
-  return `<div class="pageTitle fadeUp"><div><h2>Меню крафту</h2><span class="muted">Предмет створюється лише якщо на складі вистачає інгредієнтів</span></div></div>
-  <div class="bar"><input id="q" placeholder="🔍 Пошук рецепта…" value="${esc(S.q)}" oninput="S.q=this.value;renderCraftList()"><div class="chips">${chips('recipe')}</div></div><div id="list"></div>`;
-}
-function maxCraft(r) {
-  return Math.min(...r.ingredients.map(g => { const it = itemById(g.itemId); return it ? Math.floor(it.qty / g.qty) : 0; }));
-}
-function renderCraftList() {
-  const el = $('#list'); if (!el) return;
-  const q = S.q.toLowerCase();
-  const list = S.recipes.filter(r => r.active && (S.cat === 'all' || r.categoryId === S.cat) && (!q || (r.name + r.desc).toLowerCase().includes(q)));
-  el.innerHTML = list.length ? `<div class="grid big">${list.map((r, n) => {
-    const t = S.times[r.id] || 1, mx = maxCraft(r), can = mx >= t, res = itemById(r.resultItemId);
-    return `<div class="card it tilt fadeUp" style="animation-delay:${Math.min(n, 12) * .05}s">
-      <div class="row" style="justify-content:space-between"><span class="ic">${esc(r.icon)}</span><span class="badge ${mx > 0 ? 'ok' : 'bad'}">${mx > 0 ? 'Можна створити: ' + mx : 'Немає матеріалів'}</span></div>
-      <h3>${esc(r.name)}</h3><div class="muted" style="font-size:.8rem">${esc(catIcon(r.categoryId))} ${esc(catName(r.categoryId))}</div>
-      ${r.desc ? `<div class="muted" style="font-size:.82rem;margin-top:.3rem">${esc(r.desc)}</div>` : ''}
-      <div class="result">➜ Результат: <b>${esc(res ? res.name : '???')} ×${r.resultQty * t}</b></div>
-      <ul class="ingr">${r.ingredients.map(g => { const it = itemById(g.itemId), have = it ? it.qty : 0, need = g.qty * t;
-        return `<li class="${have >= need ? 'ok' : 'no'}"><span>${esc(it ? it.icon + ' ' + it.name : '???')}</span><b>${num(have)} / ${num(need)}</b></li>`; }).join('')}</ul>
-      <div class="row" style="justify-content:space-between">
-        <div class="stepper"><button data-act="tm" data-id="${r.id}" data-d="-1">−</button><span>${t}</span><button data-act="tm" data-id="${r.id}" data-d="1">+</button><button data-act="tm" data-id="${r.id}" data-d="max" title="Максимум">⤒</button></div>
-        <button class="btn" data-act="craft" data-id="${r.id}" ${can ? '' : 'disabled'}>${can ? '⚒️ Створити' : 'Не вистачає'}</button></div>
-    </div>`; }).join('')}</div>` : `<div class="empty"><span class="big">⚒️</span>Рецептів поки немає</div>`;
-}
-async function doCraft(id, btn) {
-  const r = S.recipes.find(x => x.id === id); btn.disabled = true; btn.textContent = 'Кроблю…';
-  try {
-    const j = await api('craft', { recipeId: id, times: S.times[id] || 1 });
-    S.items = j.items; toast(`✅ Створено: ${j.resultName} ×${j.made}`);
-    const b = btn.getBoundingClientRect(); puff(b.left + b.width / 2, b.top);
-    S.times[id] = 1;
-  } catch (e) { toast(e.message, 'err'); try { await load(); } catch (_) {} }
-  renderCraftList();
-}
+/* ---------- форми адміна ---------- */
+const M=async(a,d,ok)=>{const r=await W(a,d);ok&&toast(ok);main();return r};
+const parseIng=t=>{const o={};String(t).split('\n').forEach(l=>{const m=l.trim().match(/^(.+?)\s*[=:×*]\s*(\d+)$/);if(m)o[m[1].trim()]=+m[2]});return o};
+const D=(k,id)=>(Array.isArray(S.d)?S.d:[]).find(x=>x.id===id);
+function userForm(u){const rl=(S.x&&S.x.map?S.x:[]);
+  form({title:u?'Редагувати користувача':'Новий користувач',fields:[{k:'name',label:"Ім'я (персонаж)",value:u?.name},{k:'login',label:'Логін (латиниця)',value:u?.login},...(u?[]:[{k:'password',type:'password',label:'Пароль (від 6 символів)'}]),
+  {k:'role',type:'select',label:'Тип',options:[{v:'employee',t:'Співробітник'},{v:'admin',t:'Адміністратор'}],value:u?.role||'employee'},
+  {k:'roleId',type:'select',label:'Роль (набір прав)',options:[{v:'',t:'— без ролі (окремі права) —'},...rl.map(r=>({v:r.id,t:r.name}))],value:u?.roleId||''},
+  {k:'perms',type:'multi',label:'Окремі права (якщо без ролі)',options:PERMS,value:String(u?.perms||'stock,craft,log').split(',')},{k:'skill',type:'number',label:'Рівень уміння (1–10)',value:u?.skill||1},{k:'tg',label:'Telegram (без @)',value:u?.tg},{k:'notes',label:'Нотатки',value:u?.notes}],
+  onSubmit:v=>M('admin.userSave',{...v,perms:v.perms.join(','),id:u?.id},'Збережено')})}
+function recForm(r){form({title:r?'Редагувати рецепт':'Новий рецепт',note:'Інгредієнти — по рядку: Назва = кількість. Нові предмети створяться автоматично.',fields:[{k:'name',label:'Назва рецепта (блок)',value:r?.name},{k:'out',label:'Що створюється (предмет)',value:r?.out},{k:'cat',type:'select',label:'Категорія',options:catOpts(),value:r?.cat},
+  {k:'yield',type:'number',label:'Вихід за 1 блок',value:r?.yield||1},{k:'unit',label:'Одиниця',value:r?.unit||'шт'},{k:'skill',type:'number',label:'Потрібне уміння',value:r?.skill||1},{k:'time',type:'number',label:'Час, с',value:r?.time||0},
+  {k:'ing',type:'textarea',rows:5,label:'Інгредієнти',value:r?Object.entries(r.ing).map(([n,q])=>n+' = '+q).join('\n'):''},{k:'enabled',type:'checkbox',label:'Рецепт увімкнено',value:r?r.enabled:true}],
+  onSubmit:v=>M('admin.recipeSave',{...v,ing:parseIng(v.ing),id:r?.id},'Рецепт збережено')})}
 
-/* ---- Адмін-панель ---- */
-const ADM = [['items', '📦 Склад'], ['cats', '🗂️ Категорії'], ['recipes', '⚒️ Крафт'], ['users', '👥 Користувачі'], ['settings', '🎨 Налаштування'], ['log', '📜 Журнал дій']];
-function viewAdmin() {
-  return `<div class="pageTitle fadeUp"><div><h2>Адмін-панель</h2><span class="muted">Повне керування магазином і сайтом</span></div></div>
-  <div class="tabs">${ADM.map(([k, t]) => `<button data-act="adm" data-v="${k}" class="${S.adm === k ? 'on' : ''}">${t}</button>`).join('')}</div>
-  <div class="fadeUp">${({ items: admItems, cats: admCats, recipes: admRecipes, users: admUsers, settings: admSettings, log: admLog })[S.adm]()}</div>`;
-}
-function admItems() {
-  return `<div class="row" style="margin-bottom:1rem"><button class="btn" data-act="itemNew">＋ Новий предмет</button><span class="muted">Зміна кількості — кнопками «Поповнити» / «Списати» (все пишеться в журнал)</span></div>
-  <div class="card tblWrap"><table class="tbl"><tr><th></th><th>Назва</th><th>Категорія</th><th>Кількість</th><th>Мін.</th><th>Дії</th></tr>
-  ${S.items.map(i => `<tr><td style="font-size:1.5rem">${esc(i.icon)}</td><td><b>${esc(i.name)}</b><div class="muted" style="font-size:.78rem">${esc(i.desc)}</div></td><td>${esc(catName(i.categoryId))}</td>
-  <td>${isLow(i) ? '<span class="badge bad">' + num(i.qty) + '</span>' : '<b>' + num(i.qty) + '</b>'} ${esc(i.unit)}</td><td>${i.minQty}</td>
-  <td><div class="acts"><button class="btn sm" data-act="stockAdd" data-id="${i.id}">＋ Поповнити</button><button class="btn sm ghost" data-act="stockSub" data-id="${i.id}">− Списати</button><button class="btn sm ghost" data-act="itemEdit" data-id="${i.id}">✏️</button><button class="btn sm danger" data-act="itemDel" data-id="${i.id}">🗑</button></div></td></tr>`).join('') || '<tr><td colspan="6" class="empty">Склад порожній</td></tr>'}
-  </table></div>`;
-}
-function admCats() {
-  const blk = (t, title) => `<div class="card tblWrap" style="margin-bottom:1.2rem"><div class="row" style="padding:.8rem;justify-content:space-between"><h3>${title}</h3><button class="btn sm" data-act="catNew" data-t="${t}">＋ Категорія</button></div>
-  <table class="tbl">${catsOf(t).map(c => `<tr><td style="font-size:1.4rem;width:50px">${esc(c.icon)}</td><td><b>${esc(c.name)}</b></td><td style="width:140px"><div class="acts"><button class="btn sm ghost" data-act="catEdit" data-id="${c.id}">✏️</button><button class="btn sm danger" data-act="catDel" data-id="${c.id}">🗑</button></div></td></tr>`).join('') || '<tr><td class="empty">Немає категорій</td></tr>'}</table></div>`;
-  return blk('item', '📦 Категорії складу') + blk('recipe', '⚒️ Категорії крафту');
-}
-function admRecipes() {
-  return `<div class="row" style="margin-bottom:1rem"><button class="btn" data-act="recNew">＋ Новий рецепт</button></div>
-  <div class="card tblWrap"><table class="tbl"><tr><th></th><th>Рецепт</th><th>Категорія</th><th>Результат</th><th>Інгредієнти</th><th>Стан</th><th>Дії</th></tr>
-  ${S.recipes.map(r => { const res = itemById(r.resultItemId); return `<tr><td style="font-size:1.5rem">${esc(r.icon)}</td><td><b>${esc(r.name)}</b></td><td>${esc(catName(r.categoryId))}</td>
-  <td>${esc(res ? res.name : '???')} ×${r.resultQty}</td><td class="muted" style="font-size:.82rem">${r.ingredients.map(g => { const it = itemById(g.itemId); return esc(it ? it.name : '???') + ' ×' + g.qty; }).join(', ')}</td>
-  <td>${r.active ? '<span class="badge ok">Активний</span>' : '<span class="badge bad">Вимкнено</span>'}</td>
-  <td><div class="acts"><button class="btn sm ghost" data-act="recEdit" data-id="${r.id}">✏️</button><button class="btn sm danger" data-act="recDel" data-id="${r.id}">🗑</button></div></td></tr>`; }).join('') || '<tr><td colspan="7" class="empty">Рецептів немає</td></tr>'}
-  </table></div>`;
-}
-function admUsers() {
-  return `<div class="row" style="margin-bottom:1rem"><button class="btn" data-act="userNew">＋ Новий користувач</button></div>
-  <div class="card tblWrap"><table class="tbl"><tr><th>Логін</th><th>Ім'я</th><th>Роль</th><th>Створено</th><th>Стан</th><th>Дії</th></tr>
-  ${S.users.map(u => `<tr><td><b>${esc(u.login)}</b></td><td>${esc(u.name)}</td><td>${u.role === 'admin' ? '<span class="badge">Адмін</span>' : 'Працівник'}</td><td class="muted">${esc(u.created)}</td>
-  <td>${u.active ? '<span class="badge ok">Активний</span>' : '<span class="badge bad">Заблокований</span>'}</td>
-  <td><div class="acts"><button class="btn sm ghost" data-act="userEdit" data-id="${esc(u.login)}">✏️</button>${u.login === S.user.login ? '' : `<button class="btn sm danger" data-act="userDel" data-id="${esc(u.login)}">🗑</button>`}</div></td></tr>`).join('')}
-  </table></div>`;
-}
-function admSettings() {
-  const c = S.cfg;
-  return `<div class="card" style="padding:1.4rem;max-width:640px"><form id="sf">
-  ${fieldHtml({ k: 'siteName', label: 'Назва сайту / магазину', value: c.siteName })}${fieldHtml({ k: 'tagline', label: 'Підзаголовок (на сторінці входу)', value: c.tagline })}
-  ${fieldHtml({ k: 'welcome', label: 'Вітальне повідомлення після входу', value: c.welcome })}
-  <div class="row"><div class="grow">${fieldHtml({ k: 'accent', type: 'color', label: 'Основний колір', value: c.accent })}</div><div class="grow">${fieldHtml({ k: 'accent2', type: 'color', label: 'Додатковий колір', value: c.accent2 })}</div></div>
-  ${fieldHtml({ k: 'fx', type: 'checkbox', label: 'Увімкнути дим, іскри та плаваючі декорації', value: c.fx !== 'off' })}
-  <button class="btn" style="margin-top:1.3rem">💾 Зберегти налаштування</button></form></div>`;
-}
-function admLog() {
-  if (!S.log) { api('log').then(j => { S.log = j.log; if (S.adm === 'log') renderMain(); }).catch(e => toast(e.message, 'err')); return '<div class="loader"></div>'; }
-  return `<div class="row" style="margin-bottom:1rem"><button class="btn ghost sm" data-act="logReload">🔄 Оновити</button><span class="muted">Останні ${S.log.length} дій</span></div>
-  <div class="card tblWrap"><table class="tbl"><tr><th>Час</th><th>Хто</th><th>Дія</th><th>Деталі</th></tr>
-  ${S.log.map(l => `<tr><td class="muted" style="white-space:nowrap">${esc(l.time)}</td><td>${esc(l.user)}</td><td><span class="badge">${esc(l.action)}</span></td><td class="logTxt">${esc(l.details)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Журнал порожній</td></tr>'}</table></div>`;
-}
+/* ---------- обробники ---------- */
+const A={
+  nav:t=>{S.view=t.dataset.i;S.q='';S.cat='all';S.kind='all';render()},
+  adm:t=>{S.adm=t.dataset.i;main()},kind:t=>{S.kind=t.dataset.i;S.cat='all';main()},cat:t=>{S.cat=t.dataset.i;main()},sub:t=>{S.sub=t.dataset.i;main()},
+  out:()=>{api('logout').catch(()=>{});out()},bnx:()=>{LS.setItem('bn',S.cfg.bannerId);render()},url:askUrl,
+  mus:()=>music(),
+  prof:async()=>{try{const p=await api('profile.get');modal(`<h3>👤 ${esc(p.name)}</h3><p class="muted">${esc(p.login)} · ${p.role==='admin'?'адмін':'співробітник'} · уміння ${p.skill}</p>
+    <div class="stats" style="margin:1rem 0">${[['Крафтів',p.crafts],['Вироблено',num(p.units)],['За тиждень',num(p.weekUnits)]].map(s=>`<div class="card stat"><b>${s[1]}</b><span>${s[0]}</span></div>`).join('')}</div>
+    <p class="muted" style="font-size:.8rem">Остання активність</p>${p.history.slice(0,8).map(h=>`<div style="font-size:.82rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)"><span class="muted">${esc(h.time)}</span> ${esc(h.desc)}</div>`).join('')}
+    <div class="row end" style="margin-top:1rem"><button class="btn ghost" data-a="pw">🔑 Змінити пароль</button></div>`)}catch(e){toast(e.message,'err')}},
+  pw:()=>form({title:'Зміна пароля',fields:[{k:'old',type:'password',label:'Поточний пароль'},{k:'pw',type:'password',label:'Новий пароль (від 6 символів)'}],onSubmit:v=>W('profile.password',v).then(()=>toast('Пароль змінено'))}),
+  hist:async()=>{try{const h=await api('inventory.history');modal('<h3>Історія руху складу</h3>'+T(['Час','Хто','Предмет','Зміна','Залишок','Причина'],h.map(x=>[`<span class="muted">${esc(x.time)}</span>`,esc(x.user),esc(x.item),`<b style="color:${x.delta[0]==='-'?'var(--bad)':'var(--ok)'}">${esc(x.delta)}</b>`,x.after,esc(x.reason)])),0,1)}catch(e){toast(e.message,'err')}},
+  mv:t=>{const i=S.items.find(x=>x.id===t.dataset.i);form({title:i.name,note:`На складі: ${i.qty} ${i.unit}`,fields:[{k:'type',type:'select',label:'Операція',options:[{v:'in',t:'➕ Надходження'},{v:'out',t:'➖ Списання (потрібна причина)'},{v:'adjust',t:'✏️ Встановити кількість (потрібна причина)'}]},{k:'qty',type:'number',label:'Кількість',value:1},{k:'reason',label:'Причина / коментар'}],onSubmit:v=>W('inventory.move',{itemId:i.id,...v}).then(()=>{toast('Склад оновлено');main()})})},
+  bulk:()=>form({title:'Масове оновлення складу',note:'По рядку: Назва = кількість. Назви мають збігатися з довідником предметів.',fields:[{k:'mode',type:'select',label:'Режим',options:[{v:'set',t:'Встановити кількість (інвентаризація)'},{v:'add',t:'Додати до наявного (постачання)'}]},{k:'reason',label:'Причина (обов\'язково)'},{k:'list',type:'textarea',rows:9,label:'Список',ph:'Тютюн сушений = 1200\nПапір = 300\nЧорнила = 80'}],submit:'Застосувати',
+    onSubmit:async v=>{const rows=String(v.list).split('\n').map(l=>l.trim().match(/^(.+?)\s*(?:[=:×*]|\s)\s*(\d+)$/)).filter(Boolean).map(m=>({name:m[1].trim(),qty:+m[2]}));
+      if(!rows.length)throw Error('Не знайдено жодного рядка у форматі «Назва = кількість»');
+      const r=await W('inventory.bulk',{mode:v.mode,reason:v.reason,rows});toast(r&&r.changed?'Оновлено позицій: '+r.changed:'Змін немає');main()}}),
+  mn:t=>{const i=S.items.find(x=>x.id===t.dataset.i);form({title:'Поріг оповіщення: '+i.name,note:'Коли залишок не більший за поріг, бот напише в Telegram. 0 — вимкнути.',fields:[{k:'min',type:'number',label:'Мінімальний залишок',value:i.min}],onSubmit:v=>W('stock.setMin',{itemId:i.id,min:v.min}).then(()=>{toast('Поріг збережено');main()})})},
+  cy:t=>{const r=S.recipes.find(x=>x.id===t.dataset.i),d=t.dataset.d;let c=S.cy[r.id]||1;c=d==='max'?Math.max(1,mx(r)):Math.max(1,Math.min(1000,c+ +d));S.cy[r.id]=c;rCraft()},
+  craft:async t=>{const id=t.dataset.i;t.disabled=true;try{const r=await W('craft',{recipeId:id,cycles:S.cy[id]||1});toast(`✅ Створено: ${r.out} ×${r.produced}`);const b=t.getBoundingClientRect();puff(b.left+b.width/2,b.top);S.cy[id]=1}catch(e){toast(e.message,'err')}rCraft()},
+  cmode:t=>{S.cm=t.dataset.i;S.cv={};main()},creset:()=>{S.cv={};main()},
+  cc:t=>{const r=S.recipes.find(x=>x.id===t.dataset.i),d=+t.dataset.d,st=S.cm==='items'?r.yield:1;S.cv[r.id]=Math.max(0,(S.cv[r.id]||0)+d*st);rCalc()},
+  ccopy:()=>{const x=calcText();(navigator.clipboard?navigator.clipboard.writeText(x):Promise.reject()).catch(()=>{const e=document.createElement('textarea');e.value=x;document.body.appendChild(e);e.select();document.execCommand('copy');e.remove()}).finally(()=>toast('Розрахунок скопійовано'))},
+  csave:()=>form({title:'Зберегти план виробництва',fields:[{k:'name',label:'Назва плану'}],onSubmit:v=>{const items=live().map(r=>({rid:r.id,blocks:blocks(r)})).filter(x=>x.blocks>0);return W('plan.save',{name:v.name,items}).then(()=>toast('План збережено'))}}),
+  cload:async()=>{try{const p=await api('plan.list');modal('<h3>Збережені плани</h3>'+T(['План','Позицій','Автор',''],p.map(x=>[`<b>${esc(x.name)}</b><div class="muted" style="font-size:.75rem">${esc(x.updated)}</div>`,x.items.length,esc(x.by),`<div class="acts">${B('pl',x.id,'Завантажити')}${B('pd',x.id,'🗑','danger')}</div>`])));window._pl=p}catch(e){toast(e.message,'err')}},
+  pl:t=>{const p=window._pl.find(x=>x.id===t.dataset.i);S.cm='blocks';S.cv={};p.items.forEach(i=>S.cv[i.rid]=i.blocks);document.querySelector('.modal')?.remove();main()},
+  pd:t=>W('plan.delete',{id:t.dataset.i}).then(()=>{document.querySelector('.modal')?.remove();toast('План видалено')}).catch(e=>toast(e.message,'err')),
+  taxdel:t=>ask('Видалити цей платіж? Термін оплати буде перераховано.',()=>M('tax.delete',{id:t.dataset.i},'Платіж видалено')),
+  theme:t=>M('admin.theme',{theme:t.dataset.i},'Тему змінено').catch(e=>toast(e.message,'err')),
+  banner:()=>form({title:'Оголошення для всіх',fields:[{k:'message',type:'textarea',label:'Текст',value:S.cfg.banner},{k:'kind',type:'select',label:'Важливість',options:[{v:'info',t:'Інформація'},{v:'warn',t:'Увага'},{v:'urgent',t:'Терміново'}],value:S.cfg.bannerKind}],onSubmit:v=>M('admin.banner',v,'Оголошення опубліковано')}),
+  bnclr:()=>M('admin.banner',{message:'',kind:'info'},'Оголошення прибрано').catch(e=>toast(e.message,'err')),
+  uN:()=>userForm(),uE:t=>userForm(D('', t.dataset.i)),
+  uR:t=>form({title:'Новий пароль',fields:[{k:'password',type:'password',label:'Пароль (від 6 символів)'}],onSubmit:v=>M('admin.userReset',{id:t.dataset.i,...v},'Пароль змінено, сесії завершено')}),
+  uS:t=>{const u=D('',t.dataset.i);M('admin.userStatus',{id:u.id,status:u.status==='active'?'blocked':'active'},'Готово').catch(e=>toast(e.message,'err'))},
+  uD:t=>ask('Видалити користувача?',()=>M('admin.userDelete',{id:t.dataset.i},'Видалено')),
+  uV:async t=>{try{const u=await api('admin.userView',{id:t.dataset.i});modal(`<h3>${esc(u.name)} <small class="muted">(${esc(u.login)})</small></h3><p class="muted">Прав: ${esc(u.perms||'—')} · уміння ${u.skill} · створено ${esc(u.created)}</p><div class="stats" style="margin:1rem 0">${[['Входів',u.logins],['Невдалих',u.fails],['Крафтів',u.crafts],['Вироблено',num(u.units)]].map(s=>`<div class="card stat"><b>${s[1]}</b><span>${s[0]}</span></div>`).join('')}</div>`+u.history.slice(0,15).map(h=>`<div style="font-size:.8rem;padding:.25rem 0"><span class="muted">${esc(h.time)}</span> ${esc(h.desc)}</div>`).join(''),0,1)}catch(e){toast(e.message,'err')}},
+  rN:()=>roleForm(),rE:t=>roleForm(D('',t.dataset.i)),rD:t=>ask('Видалити роль?',()=>M('admin.roleDelete',{id:t.dataset.i},'Видалено')),
+  iN:()=>itemForm(),iE:t=>itemForm(D('',t.dataset.i)),iD:t=>ask('Видалити предмет?',()=>M('admin.itemDelete',{id:t.dataset.i},'Видалено')),iR:t=>M('admin.itemRestore',{id:t.dataset.i},'Відновлено').catch(e=>toast(e.message,'err')),
+  cN:()=>catForm(),cE:t=>catForm(D('',t.dataset.i)),cD:t=>ask('Видалити категорію?',()=>M('admin.catDelete',{id:t.dataset.i},'Видалено')),
+  pN:()=>recForm(),pE:t=>recForm(D('',t.dataset.i)),pD:t=>ask('Видалити рецепт назавжди?',()=>M('admin.recipeDelete',{id:t.dataset.i},'Видалено')),
+  pA:t=>M('admin.recipeArchive',{id:t.dataset.i},'В архіві').catch(e=>toast(e.message,'err')),pR:t=>M('admin.recipeRestore',{id:t.dataset.i},'Відновлено').catch(e=>toast(e.message,'err')),
+  kick:t=>(t.dataset.k==='all'?ask('Завершити всі інші сесії?',()=>M('admin.kick',{all:1},'Готово'),'Завершити'):M('admin.kick',{sessionId:t.dataset.i},'Сесію завершено').catch(e=>toast(e.message,'err'))),
+  kickU:t=>M('admin.kick',{userId:t.dataset.i},'Сесії завершено').catch(e=>toast(e.message,'err')),
+  tgT:t=>W('admin.tgTest',{kind:t.dataset.i}).then(()=>{toast('Тест надіслано');main()}).catch(e=>toast(e.message,'err')),
+  tgS:()=>form({title:'Повідомлення в Telegram',fields:[{k:'kind',type:'select',label:'Гілка',options:[{v:'alert',t:'Оповіщення'},{v:'tax',t:'Податок'},{v:'check',t:'Перевірка бота'}]},{k:'text',type:'textarea',rows:5,label:'Текст'}],submit:'Надіслати',onSubmit:v=>M('admin.tgSend',v,'Надіслано')}),
+  low:()=>W('admin.lowCheck').then(r=>{toast('Надіслано позицій: '+r.sent+' (малий залишок: '+r.count+')');main()}).catch(e=>toast(e.message,'err')),
+  exp:()=>api('admin.export').then(r=>dl(r.name,r.csv)).catch(e=>toast(e.message,'err')),expS:t=>api('admin.exportSheet',{name:t.dataset.i}).then(r=>dl(r.name,r.csv)).catch(e=>toast(e.message,'err'))
+};
+function roleForm(r){form({title:r?'Редагувати роль':'Нова роль',fields:[{k:'name',label:'Назва',value:r?.name},{k:'perms',type:'multi',label:'Права',options:PERMS,value:String(r?.perms||'').split(',')}],onSubmit:v=>M('admin.roleSave',{...v,perms:v.perms.join(','),id:r?.id},'Збережено')})}
+function itemForm(i){form({title:i?'Редагувати предмет':'Новий предмет',fields:[...(i?[]:[{k:'name',label:'Назва'}]),{k:'category',type:'select',label:'Категорія',options:catOpts(),value:i?.category},{k:'unit',label:'Одиниця',value:i?.unit||'шт'},{k:'min',type:'number',label:'Мінімальний залишок (оповіщення в Telegram)',value:i?.min||0},...(i?[]:[{k:'qty',type:'number',label:'Початкова кількість',value:0}]),{k:'note',label:'Примітка',value:i?.note}],onSubmit:v=>M('admin.itemSave',{...v,id:i?.id},'Збережено')})}
+function catForm(c){form({title:c?'Редагувати категорію':'Нова категорія',fields:[{k:'name',label:'Назва',value:c?.name},{k:'icon',label:'Іконка (емодзі)',value:c?.icon||'📦'},{k:'kind',type:'select',label:'Тип',options:[{v:'product',t:'Готова продукція'},{v:'raw',t:'Сировина'}],value:c?.kind}],onSubmit:v=>M('admin.catSave',{...v,id:c?.id},'Збережено')})}
 
-/* ---------- Адмін-дії ---------- */
-const catOpts = t => [{ v: '', t: '— без категорії —' }, ...catsOf(t).map(c => ({ v: c.id, t: c.icon + ' ' + c.name }))];
-async function mut(action, data, okMsg) { const j = await api(action, data); applyState(j); S.log = null; action === 'saveSettings' ? render() : renderMain(); if (okMsg) toast(okMsg); }
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&A[t.dataset.a])A[t.dataset.a](t)});
+document.addEventListener('input',e=>{const id=e.target.dataset&&e.target.dataset.ci;if(id){S.cv[id]=Math.max(0,parseInt(e.target.value)||0);rSum()}
+  if(e.target.form&&e.target.form.id==='tf'&&e.target.name==='amount'){const d=$('#days');d&&(d.textContent='≈ '+(Number(e.target.value)/S.tax.weekly*7).toFixed(2)+' дн.')}});
+document.addEventListener('submit',async e=>{const f=e.target;
+  if(f.id==='tf'){e.preventDefault();const v=Object.fromEntries(new FormData(f));const d={amount:+v.amount,payer:v.payer,note:v.note};if(v.paidAt)d.paidAt=new Date(v.paidAt).getTime();
+    try{await W('tax.pay',d);toast('✅ Оплату відмічено, повідомлення надіслано в Telegram');render()}catch(er){toast(er.message,'err')}}
+  if(f.id==='sf'){e.preventDefault();const d={};SET.forEach(([k])=>d[k]=f[k].value);d.lowEnabled=f.lowEnabled.checked?'1':'0';d.tgHeartbeat=f.tgHeartbeat.checked?'1':'0';
+    try{await W('admin.settingsSave',d);toast('Налаштування збережено');main()}catch(er){toast(er.message,'err')}}});
 
-function itemForm(it) {
-  const f = [{ k: 'name', label: 'Назва', value: it?.name, req: true }, { k: 'icon', label: 'Іконка (емодзі)', value: it?.icon || '📦' },
-    { k: 'categoryId', type: 'select', label: 'Категорія', options: catOpts('item'), value: it?.categoryId },
-    { k: 'unit', label: 'Одиниця виміру', value: it?.unit || 'шт' }, { k: 'minQty', type: 'number', label: 'Мінімальний залишок (для попередження)', value: it?.minQty ?? 0 },
-    { k: 'desc', type: 'textarea', label: 'Опис', value: it?.desc }];
-  if (!it) f.splice(4, 0, { k: 'qty', type: 'number', label: 'Стартова кількість', value: 0 });
-  form({ title: it ? 'Редагувати предмет' : 'Новий предмет', fields: f, onSubmit: v => mut('saveItem', { ...v, id: it?.id }, 'Збережено') });
-}
-function stockForm(it, sign) {
-  form({ title: (sign > 0 ? 'Поповнення: ' : 'Списання: ') + it.name, note: `Зараз на складі: ${it.qty} ${it.unit}`,
-    fields: [{ k: 'amt', type: 'number', label: 'Кількість', value: 1, req: true }, { k: 'reason', label: 'Причина / коментар', ph: sign > 0 ? 'Постачання, купівля…' : 'Продаж, брак, видача…' }],
-    submit: sign > 0 ? 'Поповнити' : 'Списати',
-    onSubmit: v => { if (!(v.amt > 0)) throw new Error('Кількість має бути більше 0'); return mut('adjustStock', { id: it.id, delta: sign * v.amt, reason: v.reason }, sign > 0 ? 'Склад поповнено' : 'Списано'); } });
-}
-function catForm(c, type) {
-  form({ title: c ? 'Редагувати категорію' : 'Нова категорія', fields: [{ k: 'name', label: 'Назва', value: c?.name, req: true }, { k: 'icon', label: 'Іконка (емодзі)', value: c?.icon || '📁' }],
-    onSubmit: v => mut('saveCategory', { ...v, id: c?.id, type: c?.type || type }, 'Збережено') });
-}
-function recipeForm(r) {
-  if (!S.items.length) return toast('Спочатку додай предмети на склад', 'err');
-  const iopt = S.items.map(i => `<option value="${i.id}">${esc(i.icon)} ${esc(i.name)}</option>`).join('');
-  const rowHtml = (g = {}) => `<div class="ingRow"><select>${iopt.replace(`value="${g.itemId}"`, `value="${g.itemId}" selected`)}</select><input type="number" min="0" step="any" value="${g.qty || 1}"><button type="button" class="btn sm danger" data-rm>✕</button></div>`;
-  const f = [{ k: 'name', label: 'Назва рецепта', value: r?.name, req: true }, { k: 'icon', label: 'Іконка (емодзі)', value: r?.icon || '🔨' },
-    { k: 'categoryId', type: 'select', label: 'Категорія крафту', options: catOpts('recipe'), value: r?.categoryId },
-    { k: 'resultItemId', type: 'select', label: 'Що створюється (предмет складу)', options: S.items.map(i => ({ v: i.id, t: i.icon + ' ' + i.name })), value: r?.resultItemId },
-    { k: 'resultQty', type: 'number', label: 'Скільки штук за 1 крафт', value: r?.resultQty ?? 1 },
-    { k: 'desc', type: 'textarea', label: 'Опис', value: r?.desc }];
-  modal(`<h3>${r ? 'Редагувати рецепт' : 'Новий рецепт'}</h3><form>${f.map(fieldHtml).join('')}
-    <label>Інгредієнти (списуються зі складу)</label><div id="ings">${(r?.ingredients?.length ? r.ingredients : [{}]).map(rowHtml).join('')}</div>
-    <button type="button" class="btn sm ghost" data-addi style="margin-top:.3rem">＋ Інгредієнт</button>
-    ${fieldHtml({ k: 'active', type: 'checkbox', label: 'Рецепт активний (видно в меню крафту)', value: r ? r.active : true })}
-    <div class="row end"><button type="button" class="btn ghost" data-x>Скасувати</button><button class="btn">Зберегти</button></div></form>`,
-    (box, close) => {
-      const ings = box.querySelector('#ings');
-      const bind = () => ings.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { if (ings.children.length > 1) b.parentElement.remove(); });
-      bind();
-      box.querySelector('[data-addi]').onclick = () => { ings.insertAdjacentHTML('beforeend', rowHtml()); bind(); };
-      box.querySelector('[data-x]').onclick = close;
-      box.querySelector('form').onsubmit = async e => {
-        e.preventDefault(); const g = k => box.querySelector(`[name="${k}"]`);
-        const ingredients = [...ings.children].map(row => ({ itemId: row.querySelector('select').value, qty: Number(row.querySelector('input').value) })).filter(x => x.qty > 0);
-        const b = box.querySelector('form .btn:not(.ghost)'); b.disabled = true;
-        try { await mut('saveRecipe', { id: r?.id, name: g('name').value, icon: g('icon').value, categoryId: g('categoryId').value, resultItemId: g('resultItemId').value,
-          resultQty: Number(g('resultQty').value), desc: g('desc').value, active: g('active').checked, ingredients }, 'Рецепт збережено'); close(); }
-        catch (err) { toast(err.message, 'err'); b.disabled = false; }
-      };
-    });
-}
-function userForm(u) {
-  form({ title: u ? 'Редагувати користувача' : 'Новий користувач', note: u ? 'Залиш пароль порожнім, щоб не змінювати.' : '',
-    fields: [{ k: 'login', label: 'Логін (латиниця)', value: u?.login, req: true }, { k: 'name', label: "Ім'я (персонаж RP)", value: u?.name },
-      { k: 'password', type: 'password', label: u ? 'Новий пароль' : 'Пароль', req: !u },
-      { k: 'role', type: 'select', label: 'Роль', options: [{ v: 'staff', t: 'Працівник' }, { v: 'admin', t: 'Адміністратор' }], value: u?.role || 'staff' },
-      { k: 'active', type: 'checkbox', label: 'Акаунт активний', value: u ? u.active : true }],
-    onSubmit: v => mut('saveUser', v, 'Користувача збережено') });
-}
+/* ---------- фонові оновлення ---------- */
+let act=0;['click','keydown','mousemove','touchstart'].forEach(ev=>addEventListener(ev,()=>act=1,{passive:true}));
+setInterval(()=>{const c=$('#cd');if(c&&S.tax&&S.tax.cov)c.textContent=cd(S.tax.cov-Date.now()-S.off)},1000);
+setInterval(async()=>{if(!S.me)return;const sig=()=>[S.tax&&S.tax.lv,S.cfg.bannerId,S.cfg.theme,S.cfg.siteName].join();const o=sig();
+  try{const p=await api('ping',{active:!!act});S.cfg=p.cfg;S.tax=p.tax;S.me=p.me;S.off=p.tax.now-Date.now();theme();
+    if(act&&!$('.modal')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&['stock','craft'].includes(S.view)){await api('boot');({stock:rStock,craft:rCraft})[S.view]()}
+    act=0;if(sig()!==o)render()}catch(e){}},25000);
 
-/* ---------- Обробка кліків ---------- */
-document.addEventListener('click', e => {
-  const t = e.target.closest('[data-act]'); if (!t) return;
-  const a = t.dataset.act, id = t.dataset.id;
-  switch (a) {
-    case 'nav': S.view = t.dataset.v; S.q = ''; S.cat = 'all'; render(); break;
-    case 'adm': S.adm = t.dataset.v; renderMain(); break;
-    case 'cat': S.cat = id; renderMain(); break;
-    case 'tm': { const r = S.recipes.find(x => x.id === id); let c = S.times[id] || 1; const d = t.dataset.d;
-      c = d === 'max' ? Math.max(1, maxCraft(r)) : Math.max(1, Math.min(999, c + Number(d))); S.times[id] = c; renderCraftList(); break; }
-    case 'craft': doCraft(id, t); break;
-    case 'logout': api('logout').catch(() => {}); S.user = null; S.token = ''; LS.removeItem('tk'); render(); break;
-    case 'pass': form({ title: 'Зміна пароля', fields: [{ k: 'o', type: 'password', label: 'Старий пароль', req: true }, { k: 'n', type: 'password', label: 'Новий пароль', req: true }],
-      onSubmit: async v => { await api('changePassword', { oldPassword: v.o, newPassword: v.n }); toast('Пароль змінено'); } }); break;
-    case 'seturl': askUrl(); break;
-    case 'itemNew': itemForm(); break;
-    case 'itemEdit': itemForm(itemById(id)); break;
-    case 'itemDel': confirmBox(`Видалити предмет «${itemById(id).name}»?`, () => mut('deleteItem', { id }, 'Видалено')); break;
-    case 'stockAdd': stockForm(itemById(id), 1); break;
-    case 'stockSub': stockForm(itemById(id), -1); break;
-    case 'catNew': catForm(null, t.dataset.t); break;
-    case 'catEdit': catForm(S.cats.find(c => c.id === id)); break;
-    case 'catDel': confirmBox('Видалити категорію?', () => mut('deleteCategory', { id }, 'Видалено')); break;
-    case 'recNew': recipeForm(); break;
-    case 'recEdit': recipeForm(S.recipes.find(r => r.id === id)); break;
-    case 'recDel': confirmBox('Видалити рецепт?', () => mut('deleteRecipe', { id }, 'Видалено')); break;
-    case 'userNew': userForm(); break;
-    case 'userEdit': userForm(S.users.find(u => u.login === id)); break;
-    case 'userDel': confirmBox(`Видалити користувача «${id}»?`, () => mut('deleteUser', { login: id }, 'Видалено')); break;
-    case 'logReload': S.log = null; renderMain(); break;
-  }
-});
-document.addEventListener('submit', async e => {
-  if (e.target.id !== 'sf') return; e.preventDefault();
-  const f = e.target, s = { siteName: f.siteName.value, tagline: f.tagline.value, welcome: f.welcome.value, accent: f.accent.value, accent2: f.accent2.value, fx: f.fx.checked ? 'on' : 'off' };
-  try { await mut('saveSettings', { settings: s }, 'Налаштування збережено'); } catch (err) { toast(err.message, 'err'); }
-});
+/* ---------- музика (генерується в браузері, без файлів) ---------- */
+let AC,mus=0,mi;
+function music(){const b=$('#mb');
+  if(mus){mus=0;clearInterval(mi);AC.suspend();b.style.opacity=.6;return}
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();mus=1;b.style.opacity=1;
+  const sc=[0,3,5,7,10,12,15,17],n=(f,t,d,v,ty)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)};let k=0;
+  mi=setInterval(()=>{const t=AC.currentTime;if(k%8===0)[55,82.4,110].forEach(f=>n(f,t,5,.035,'sine'));
+    if(Math.random()<.75)n(220*2**(sc[Math.random()*sc.length|0]/12),t,1.8,.05,'triangle');k++},650)}
 
-/* ---------- Ефекти: курсор-підсвітка ---------- */
-document.addEventListener('mousemove', e => {
-  const c = e.target.closest && e.target.closest('.tilt'); if (!c) return;
-  const b = c.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
-  c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px');
-  c.style.transform = `perspective(900px) rotateX(${((y / b.height) - .5) * -5}deg) rotateY(${((x / b.width) - .5) * 5}deg) translateY(-3px)`;
-});
-document.addEventListener('mouseout', e => { const c = e.target.closest && e.target.closest('.tilt'); if (c && !c.contains(e.relatedTarget)) c.style.transform = ''; });
+/* ---------- ефекти: підсвітка, дим, іскри ---------- */
+document.addEventListener('mousemove',e=>{const c=e.target.closest&&e.target.closest('.tilt');if(!c)return;const b=c.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
+  c.style.setProperty('--mx',x+'px');c.style.setProperty('--my',y+'px');c.style.transform=`perspective(900px) rotateX(${(y/b.height-.5)*-4}deg) rotateY(${(x/b.width-.5)*4}deg) translateY(-3px)`});
+document.addEventListener('mouseout',e=>{const c=e.target.closest&&e.target.closest('.tilt');if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
+const cv=$('#fx'),cx=cv.getContext('2d');let Wd,Hd,smoke=[],emb=[],bur=[];const rnd=(a,b)=>a+Math.random()*(b-a);
+const rs=()=>{Wd=cv.width=innerWidth;Hd=cv.height=innerHeight};addEventListener('resize',rs);rs();
+const nS=i=>({x:rnd(0,Wd),y:i?rnd(0,Hd):Hd+80,r:rnd(60,150),vy:rnd(.15,.5),ph:rnd(0,6.28),a:rnd(.025,.07)}),nE=i=>({x:rnd(0,Wd),y:i?rnd(0,Hd):Hd+10,r:rnd(.8,2.4),vy:rnd(.3,1.1),ph:rnd(0,6.28),sp:rnd(.005,.02)});
+for(let i=0;i<16;i++)smoke.push(nS(1));for(let i=0;i<34;i++)emb.push(nE(1));
+const puff=(x,y)=>{for(let i=0;i<26;i++)bur.push({x,y,vx:rnd(-2.2,2.2),vy:rnd(-3.5,-.6),r:rnd(2,5),l:1})};
+function frame(ts){requestAnimationFrame(frame);cx.clearRect(0,0,Wd,Hd);const nofx=document.body.classList.contains('nofx');
+  const h=getComputedStyle(document.body).getPropertyValue('--accent').trim().replace('#','').padEnd(6,'0'),[r,g,b]=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)||200);
+  smoke.forEach((s,i)=>{s.y-=s.vy;s.x+=Math.sin(ts/2400+s.ph)*.45;s.r+=.06;const al=s.a*Math.sin(Math.min(1,(Hd+80-s.y)/(Hd+160))*Math.PI);if(s.y<-s.r)smoke[i]=nS();
+    const gr=cx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);gr.addColorStop(0,`rgba(210,200,185,${Math.max(0,al)})`);gr.addColorStop(1,'rgba(210,200,185,0)');cx.fillStyle=gr;cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.28);cx.fill()});
+  emb.forEach((e,i)=>{e.y-=e.vy;e.x+=Math.sin(ts*e.sp+e.ph)*.7;if(e.y<-10)emb[i]=nE();cx.fillStyle=`rgba(${r},${g},${b},${.45+Math.sin(ts/220+e.ph)*.35})`;cx.shadowColor=`rgb(${r},${g},${b})`;cx.shadowBlur=10;cx.beginPath();cx.arc(e.x,e.y,e.r,0,6.28);cx.fill();cx.shadowBlur=0});
+  bur=bur.filter(p=>p.l>0);bur.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.l-=.02;cx.fillStyle=`rgba(${r},${g},${b},${Math.max(0,p.l)})`;cx.beginPath();cx.arc(p.x,p.y,p.r*p.l+.5,0,6.28);cx.fill()})}
+requestAnimationFrame(frame);
+(()=>{const em=['🍂','🌿','🚬','🔥','🍃','🕯️','🍁'],d=$('#decor');for(let i=0;i<14;i++){const s=document.createElement('span');s.className='fl';s.textContent=em[i%em.length];s.style.cssText=`left:${rnd(2,96)}%;top:${rnd(5,92)}%;font-size:${rnd(1.4,3.8)}rem;--d:${rnd(14,28)}s;--dl:${-rnd(0,20)}s`;d.appendChild(s)}})();
 
-/* ---------- Ефекти: дим, іскри, декор ---------- */
-const cv = $('#fx'), cx = cv.getContext('2d'); let W, H, smoke = [], embers = [], bursts = [];
-function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
-addEventListener('resize', resize); resize();
-const rnd = (a, b) => a + Math.random() * (b - a);
-function newSmoke(init) { return { x: rnd(0, W), y: init ? rnd(0, H) : H + 80, r: rnd(60, 150), vy: rnd(.15, .5), ph: rnd(0, 6.28), a: rnd(.025, .07), life: rnd(0, 1) }; }
-function newEmber(init) { return { x: rnd(0, W), y: init ? rnd(0, H) : H + 10, r: rnd(.8, 2.4), vy: rnd(.3, 1.1), ph: rnd(0, 6.28), sp: rnd(.005, .02) }; }
-for (let i = 0; i < 16; i++) smoke.push(newSmoke(true)); for (let i = 0; i < 34; i++) embers.push(newEmber(true));
-function hexRgb(h) { h = (h || '#e8a33d').replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
-function puff(x, y) { for (let i = 0; i < 26; i++) bursts.push({ x, y, vx: rnd(-2.2, 2.2), vy: rnd(-3.5, -.6), r: rnd(2, 5), life: 1 }); }
-function tick(ts) {
-  requestAnimationFrame(tick);
-  if (document.body.classList.contains('nofx') && !bursts.length) { cx.clearRect(0, 0, W, H); return; }
-  cx.clearRect(0, 0, W, H);
-  const [r, g, b] = hexRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
-  if (!document.body.classList.contains('nofx')) {
-    smoke.forEach((s, i) => {
-      s.y -= s.vy; s.x += Math.sin(ts / 2400 + s.ph) * .45; s.r += .06; s.life += .0012;
-      const al = s.a * Math.sin(Math.min(1, ((H + 80 - s.y) / (H + 160))) * Math.PI);
-      if (s.y < -s.r) smoke[i] = newSmoke(false);
-      const gr = cx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r); gr.addColorStop(0, `rgba(210,200,185,${Math.max(0, al)})`); gr.addColorStop(1, 'rgba(210,200,185,0)');
-      cx.fillStyle = gr; cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, 6.28); cx.fill();
-    });
-    embers.forEach((e, i) => {
-      e.y -= e.vy; e.x += Math.sin(ts * e.sp + e.ph) * .7; if (e.y < -10) embers[i] = newEmber(false);
-      const fl = .45 + Math.sin(ts / 220 + e.ph) * .35;
-      cx.fillStyle = `rgba(${r},${g},${b},${fl})`; cx.shadowColor = `rgb(${r},${g},${b})`; cx.shadowBlur = 10;
-      cx.beginPath(); cx.arc(e.x, e.y, e.r, 0, 6.28); cx.fill(); cx.shadowBlur = 0;
-    });
-  }
-  bursts = bursts.filter(p => p.life > 0);
-  bursts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .05; p.life -= .02; cx.fillStyle = `rgba(${r},${g},${b},${Math.max(0, p.life)})`; cx.beginPath(); cx.arc(p.x, p.y, p.r * p.life + .5, 0, 6.28); cx.fill(); });
-}
-requestAnimationFrame(tick);
-(function decor() {
-  const em = ['🍂', '🌿', '🚬', '🔥', '🍃', '🪔', '🕯️', '🍁']; const d = $('#decor');
-  for (let i = 0; i < 15; i++) { const s = document.createElement('span'); s.className = 'fl'; s.textContent = em[i % em.length];
-    s.style.cssText = `left:${rnd(2, 96)}%;top:${rnd(5, 92)}%;font-size:${rnd(1.4, 4)}rem;--d:${rnd(14, 28)}s;--dl:${-rnd(0, 20)}s`; d.appendChild(s); }
-})();
-
-/* ---------- Запуск ---------- */
-async function boot() {
-  const app = $('#app'); app.innerHTML = '<div class="loader"></div>';
-  if (!API) { S.cfg = {}; render(); askUrl(); return; }
-  try { const p = await api('public'); S.cfg = p.settings; applyTheme(); }
-  catch (e) { toast(e.message, 'err'); }
-  if (S.token) { try { await load(); } catch (e) { S.user = null; } }
+/* ---------- запуск ---------- */
+async function start(){
+  if(!API){render();askUrl();return}
+  if(S.token){try{await api('boot')}catch(e){S.me=null}}
   render();
 }
-boot();
+start();
 </script>
 </body>
 </html>
